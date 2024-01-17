@@ -1,0 +1,20 @@
+{
+  "name": "egrul-data-processor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hrustalevdev/egrul-data-processor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hrustalevdev/egrul-data-processor/issues"
+  },
+  "homepage": "https://github.com/hrustalevdev/egrul-data-processor#readme"
+}
