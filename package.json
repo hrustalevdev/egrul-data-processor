@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/hrustalevdev/egrul-data-processor/issues"
   },
-  "homepage": "https://github.com/hrustalevdev/egrul-data-processor#readme"
+  "homepage": "https://github.com/hrustalevdev/egrul-data-processor#readme",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
 }
