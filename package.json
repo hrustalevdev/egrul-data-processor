@@ -17,6 +17,10 @@
     "url": "https://github.com/hrustalevdev/egrul-data-processor/issues"
   },
   "homepage": "https://github.com/hrustalevdev/egrul-data-processor#readme",
+  "dependencies": {
+    "iconv-lite": "^0.6.3",
+    "jszip": "^3.10.1"
+  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
