@@ -40,6 +40,7 @@ module.exports = {
     },
   },
   rules: {
+    '@typescript-eslint/consistent-type-imports': 'error',
     'import/no-commonjs': 'off',
     'import/no-deprecated': 'warn',
     'import/prefer-default-export': 'off',
