@@ -1,26 +1,31 @@
 import { model, Schema } from 'mongoose';
 
-export enum EOrganizationType {
-  LEGAL = 'legal',
-  INDIVIDUAL = 'individual',
+export interface IOrganizationName {
+  short?: string;
+  full: string;
 }
 
-interface IOrganization {
-  name: string;
-  type: EOrganizationType;
-  inn: string;
+export interface IOrganization {
+  ogrn: string;
+  ogrnDate: Date;
+  name: IOrganizationName;
+  opf?: string;
+  inn?: string;
   kpp?: string;
 }
 
+const organizationNameSchema = new Schema<IOrganizationName>({
+  short: String,
+  full: { type: String, required: true },
+});
+
 const organizationSchema = new Schema<IOrganization>({
-  name: { type: String, required: true },
-  type: {
-    type: String,
-    required: true,
-    enum: [EOrganizationType.LEGAL, EOrganizationType.INDIVIDUAL],
-  },
-  inn: { type: String, required: true },
-  kpp: { type: String },
+  ogrn: { type: String, required: true },
+  ogrnDate: { type: Date, required: true },
+  name: { type: organizationNameSchema, required: true },
+  opf: String,
+  inn: String,
+  kpp: String,
 });
 
 export const Organization = model<IOrganization>(

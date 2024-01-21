@@ -1,2 +1,3 @@
 export { db } from './Database';
-export { Organization, EOrganizationType } from './models/Organization';
+export { Organization, IOrganization } from './models/Organization';
+export { OrganizationBuilder } from './models/OrganizationBuilder';

@@ -2,8 +2,10 @@ import iconv from 'iconv-lite';
 import JSZip from 'jszip';
 import fs from 'node:fs';
 import path from 'node:path';
+import sax from 'sax';
 
-import { db, Organization } from './db';
+import { db, Organization, OrganizationBuilder } from './db';
+import type { IOrganization } from './db';
 
 const INPUT_FOLDER_PATH = path.resolve(__dirname, '..', 'input', '_egrul');
 
@@ -11,61 +13,78 @@ const enrich = async () => {
   await db.connect();
   await db.connection.dropDatabase();
 
-  console.log('>>>INPUT_FOLDER_PATH: ', INPUT_FOLDER_PATH);
   const zipFileNames = fs
     .readdirSync(INPUT_FOLDER_PATH)
     .filter((file) => file.match(/\.zip$/i));
-  console.log('>>>ZIP FILES: ', zipFileNames);
+
   const zipFilePaths = zipFileNames.map((file) =>
     path.resolve(INPUT_FOLDER_PATH, file),
   );
-  console.log('>>>ZIP FILES PATHS: ', zipFilePaths);
 
-  for (let i = 0; i < zipFilePaths.length; i++) {
-    const zipFilePath = zipFilePaths[i];
+  for (const zipFilePath of zipFilePaths) {
     const zipFile = await JSZip.loadAsync(fs.readFileSync(zipFilePath));
     const xmlFiles = Object.values(zipFile.files).filter((file) =>
       file.name.match(/\.xml$/i),
     );
-    console.log('>>>XML FILES: ', xmlFiles);
 
-    for (let j = 0; j < xmlFiles.length; j++) {
-      const xmlFile = xmlFiles[j];
+    for (const xmlFile of xmlFiles) {
+      const saxStream = sax.createStream(true, { trim: true });
       const xmlStream = xmlFile
         .nodeStream()
-        .pipe(iconv.decodeStream('win1251'));
+        .pipe(iconv.decodeStream('win1251'))
+        .pipe(saxStream);
 
-      let xmlContent = '';
+      const organizations: IOrganization[] = [];
+      let organization: OrganizationBuilder | null = null;
 
-      xmlStream.on('data', (chunk) => {
-        xmlContent += chunk;
-        const lines = xmlContent.split('\n');
-        console.log('>>>LINES: ', lines);
+      xmlStream.on('opentag', (node) => {
+        switch (node.name) {
+          case 'СвЮЛ': {
+            if (organization) organizations.push(organization.build());
+
+            const ogrn = node.attributes['ОГРН'] as string;
+            const ogrnDate = node.attributes['ДатаОГРН'] as string;
+            const opf = node.attributes?.['ПолнНаимОПФ'] as string;
+            const inn = node.attributes?.['ИНН'] as string;
+            const kpp = node.attributes?.['КПП'] as string;
+
+            organization = new OrganizationBuilder(
+              ogrn,
+              ogrnDate,
+              opf,
+              inn,
+              kpp,
+            );
+            break;
+          }
+          case 'СвНаимЮЛ': {
+            const fullName = node.attributes['НаимЮЛПолн'] as string;
+            organization?.setFullName(fullName);
+            break;
+          }
+          case 'СвНаимЮЛСокр': {
+            const shortName = node.attributes['НаимСокр'] as string;
+            organization?.setShortName(shortName);
+            break;
+          }
+        }
+      });
+
+      xmlStream.on('end', () => {
+        if (organization) organizations.push(organization.build());
+        Organization.insertMany(organizations);
+        console.log('>>>END');
+      });
+
+      // TODO
+      xmlStream.on('error', (error) => {
+        console.log('>>>ERROR: ', error);
       });
     }
   }
 
-  await Organization.create({
-    name: 'Bill',
-    inn: '123',
-    kpp: '123',
-    type: 'legal',
-  });
-  await Organization.insertMany([
-    {
-      name: 'Bill',
-      inn: '123',
-      kpp: '123',
-      type: 'legal',
-    },
-    {
-      name: 'Bill',
-      inn: '123',
-      kpp: '123',
-      type: 'legal',
-    },
-  ]);
-  await db.disconnect();
+  // TODO
+  // await db.disconnect();
 };
 
 enrich();
