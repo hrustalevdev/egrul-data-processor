@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/index"
+    "start": "ts-node src/index",
+    "enrich": "ts-node src/enrich"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,7 @@
   "dependencies": {
     "iconv-lite": "^0.6.3",
     "jszip": "^3.10.1",
+    "mongodb": "^6.3.0",
     "mongoose": "^8.1.0"
   },
   "devDependencies": {
