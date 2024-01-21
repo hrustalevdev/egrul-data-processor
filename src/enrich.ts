@@ -2,6 +2,7 @@ import iconv from 'iconv-lite';
 import JSZip from 'jszip';
 import fs from 'node:fs';
 import path from 'node:path';
+import ProgressBar from 'progress';
 import sax from 'sax';
 
 import { db, Organization, OrganizationBuilder } from './db';
@@ -21,13 +22,26 @@ const enrich = async () => {
     path.resolve(INPUT_FOLDER_PATH, file),
   );
 
-  for (const zipFilePath of zipFilePaths) {
+  for (let i = 0; i < zipFilePaths.length; i++) {
+    const zipFilePath = zipFilePaths[i];
     const zipFile = await JSZip.loadAsync(fs.readFileSync(zipFilePath));
     const xmlFiles = Object.values(zipFile.files).filter((file) =>
       file.name.match(/\.xml$/i),
     );
 
-    for (const xmlFile of xmlFiles) {
+    const progressBar = new ProgressBar(
+      `Processing "${zipFileNames[i]}"`.padEnd(43, ' ') +
+        ': [:bar] :ratexml/s :percent :etas :elapseds',
+      {
+        complete: '=',
+        incomplete: ' ',
+        width: 30,
+        total: xmlFiles.length,
+      },
+    );
+
+    for (let j = 0; j < xmlFiles.length; j++) {
+      const xmlFile = xmlFiles[j];
       const saxStream = sax.createStream(true, { trim: true });
       const xmlStream = xmlFile
         .nodeStream()
@@ -70,21 +84,27 @@ const enrich = async () => {
         }
       });
 
+      xmlStream.on('error', (error) => {
+        console.error(error);
+      });
+
       xmlStream.on('end', () => {
         if (organization) organizations.push(organization.build());
         Organization.insertMany(organizations);
-        console.log('>>>END');
       });
 
-      // TODO
-      xmlStream.on('error', (error) => {
-        console.log('>>>ERROR: ', error);
-      });
+      await new Promise((resolve) => xmlStream.on('end', resolve));
+      progressBar.tick();
+
+      const isLastFile =
+        i === zipFilePaths.length - 1 && j === xmlFiles.length - 1;
+
+      if (isLastFile) {
+        console.log('Processing finished');
+        await db.disconnect();
+      }
     }
   }
-
-  // TODO
-  // await db.disconnect();
 };
 
 enrich();
