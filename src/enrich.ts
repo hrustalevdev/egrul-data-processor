@@ -16,7 +16,12 @@ const enrich = async () => {
 
   const zipFileNames = fs
     .readdirSync(INPUT_FOLDER_PATH)
-    .filter((file) => file.match(/\.zip$/i));
+    .filter((file) => file.match(/\.zip$/i))
+    .sort((a, b) => {
+      const numberA = Number(a.match(/(\d+)\.zip$/)?.[1]);
+      const numberB = Number(b.match(/(\d+)\.zip$/)?.[1]);
+      return numberA - numberB;
+    });
 
   const zipFilePaths = zipFileNames.map((file) =>
     path.resolve(INPUT_FOLDER_PATH, file),
