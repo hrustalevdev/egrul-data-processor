@@ -5,17 +5,15 @@ import path from 'node:path';
 import ProgressBar from 'progress';
 import sax from 'sax';
 
-import { db, Organization, OrganizationBuilder } from './db';
-import type { IOrganization } from './db';
+import { db, Organization, OrganizationBuilder } from '../db';
+import type { IOrganization } from '../db';
 
-const INPUT_FOLDER_PATH = path.resolve(__dirname, '..', 'input', '_egrul');
-
-const enrich = async () => {
+export const enrich = async (inputFolderPath: string) => {
   await db.connect();
   await db.connection.dropDatabase();
 
   const zipFileNames = fs
-    .readdirSync(INPUT_FOLDER_PATH)
+    .readdirSync(inputFolderPath)
     .filter((file) => file.match(/\.zip$/i))
     .sort((a, b) => {
       const numberA = Number(a.match(/(\d+)\.zip$/)?.[1]);
@@ -24,7 +22,7 @@ const enrich = async () => {
     });
 
   const zipFilePaths = zipFileNames.map((file) =>
-    path.resolve(INPUT_FOLDER_PATH, file),
+    path.resolve(inputFolderPath, file),
   );
 
   for (let i = 0; i < zipFilePaths.length; i++) {
@@ -111,5 +109,3 @@ const enrich = async () => {
     }
   }
 };
-
-enrich();
