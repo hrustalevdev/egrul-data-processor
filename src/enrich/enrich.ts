@@ -1,10 +1,10 @@
 import JSZip from 'jszip';
 import fs from 'node:fs';
 import path from 'node:path';
-import ProgressBar from 'progress';
 
 import { db } from '../db';
 
+import { Progress } from './lib/Progress';
 import { xmlProcess } from './lib/xmlProcess';
 
 export const enrich = async (inputFolderPath: string) => {
@@ -31,25 +31,20 @@ export const enrich = async (inputFolderPath: string) => {
       file.name.match(/\.xml$/i),
     );
 
-    const progressBar = new ProgressBar(
-      `Processing "${zipFileNames[i]}"`.padEnd(43, ' ') +
-        ': [:bar] :ratexml/s :percent :etas :elapseds',
-      {
-        complete: '=',
-        incomplete: ' ',
-        width: 30,
-        total: xmlFiles.length,
-      },
-    );
-
-    const tick = progressBar.tick.bind(progressBar);
+    const progress = new Progress(zipFileNames[i], xmlFiles.length);
 
     for (let j = 0; j < xmlFiles.length; j++) {
       const xmlFile = xmlFiles[j];
       const isLastFile =
         i === zipFilePaths.length - 1 && j === xmlFiles.length - 1;
 
-      await xmlProcess(xmlFile, isLastFile, tick);
+      await xmlProcess(xmlFile);
+      progress.tick();
+
+      if (isLastFile) {
+        console.log('Processing finished');
+        await db.disconnect();
+      }
     }
   }
 };

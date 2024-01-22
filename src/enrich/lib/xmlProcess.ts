@@ -2,14 +2,10 @@ import iconv from 'iconv-lite';
 import type JSZip from 'jszip';
 import sax from 'sax';
 
-import { db, Organization, OrganizationBuilder } from '../../db';
+import { Organization, OrganizationBuilder } from '../../db';
 import type { IOrganization } from '../../db';
 
-export const xmlProcess = async (
-  xmlFile: JSZip.JSZipObject,
-  isLastFile: boolean,
-  onProgress: () => void,
-) => {
+export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
   const saxStream = sax.createStream(true, { trim: true });
   const xmlStream = xmlFile
     .nodeStream()
@@ -57,10 +53,4 @@ export const xmlProcess = async (
   });
 
   await new Promise((resolve) => xmlStream.on('end', resolve));
-  onProgress();
-
-  if (isLastFile) {
-    console.log('Processing finished');
-    await db.disconnect();
-  }
 };
