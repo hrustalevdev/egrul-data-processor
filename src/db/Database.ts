@@ -6,8 +6,10 @@ type TConnection = Connection;
 interface IDBOptions extends ConnectOptions {
   url: string;
 }
+const DB_NAME =
+  process.env.NODE_ENV === 'testing' ? 'egrul_egrip_test' : 'egrul_egrip';
 
-const URL = 'mongodb://127.0.0.1:27017/egrul_egrip';
+const URL = `mongodb://127.0.0.1:27017/${DB_NAME}`;
 
 class Database {
   private _db: TDatabase;

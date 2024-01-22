@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node src/index",
-    "enrich": "ts-node src/enrich"
+    "enrich": "ts-node src/enrich",
+    "enrich:test": "NODE_ENV=testing ts-node src/enrich"
   },
   "repository": {
     "type": "git",
