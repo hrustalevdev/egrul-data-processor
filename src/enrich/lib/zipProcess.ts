@@ -14,8 +14,10 @@ export const zipProcess = async (zipFilePath: string) => {
   const zipFileName = path.basename(zipFilePath);
   const progress = new Progress(zipFileName, xmlFiles.length);
 
-  for (const xmlFile of xmlFiles) {
-    await xmlProcess(xmlFile);
-    progress.tick();
-  }
+  await Promise.all(
+    xmlFiles.map(async (xmlFile) => {
+      await xmlProcess(xmlFile);
+      progress.tick();
+    }),
+  );
 };
