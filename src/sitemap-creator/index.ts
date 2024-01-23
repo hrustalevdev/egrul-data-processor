@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { sitemap } from './sitemap';
+import { sitemapCreator } from './sitemap-creator';
 
 const outputFolderPath = path.resolve(
   __dirname,
@@ -10,4 +10,4 @@ const outputFolderPath = path.resolve(
   'sitemap',
 );
 
-sitemap(outputFolderPath);
+sitemapCreator(outputFolderPath);
