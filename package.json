@@ -4,14 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "enrich": "DROP_DATABASE=true npm run enrich:egrul && npm run enrich:egrip",
-    "enrich:egrul": "tsc && REGISTRY_TYPE=egrul node dist/enrich",
-    "enrich:egrip": "tsc && REGISTRY_TYPE=egrip node dist/enrich",
-    "enrich:test": "DROP_DATABASE=true npm run enrich:egrul:test && npm run enrich:egrip:test",
-    "enrich:egrul:test": "tsc && NODE_ENV=testing REGISTRY_TYPE=egrul node dist/enrich",
-    "enrich:egrip:test": "tsc && NODE_ENV=testing REGISTRY_TYPE=egrip node dist/enrich",
-    "sitemap": "tsc && node dist/sitemap"
+    "build": "rm -rf ./dist && tsc",
+    "clean:sitemap": "rm -rf ./output/sitemap",
+    "confirmation": "echo 'Are you sure? (y/n)' && read -r answer && [ \"$answer\" = \"y\" ]",
+    "enrich": "npm run confirmation && npm run build && DROP_DATABASE=true npm run enrich:egrul && npm run enrich:egrip",
+    "enrich:egrul": "npm run confirmation && npm run build && REGISTRY_TYPE=egrul node dist/enrich",
+    "enrich:egrip": "npm run confirmation && npm run build && REGISTRY_TYPE=egrip node dist/enrich",
+    "enrich:test": "npm run build && DROP_DATABASE=true npm run enrich:egrul:test && npm run enrich:egrip:test",
+    "enrich:egrul:test": "npm run build && NODE_ENV=testing REGISTRY_TYPE=egrul node dist/enrich",
+    "enrich:egrip:test": "npm run build && NODE_ENV=testing REGISTRY_TYPE=egrip node dist/enrich",
+    "sitemap:test": "npm run build && npm run clean:sitemap && NODE_ENV=testing node dist/sitemap-creator"
   },
   "repository": {
     "type": "git",
