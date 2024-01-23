@@ -1,13 +1,17 @@
 import path from 'node:path';
 
+import { isTesting, registryType } from '../env';
+
 import { enrich } from './enrich';
 
-const INPUT_FOLDER_PATH = path.resolve(
+const folderName = isTesting ? `_${registryType}` : `${registryType}`;
+
+const inputFolderPath = path.resolve(
   __dirname,
   '..',
   '..',
   'input',
-  '_egrul',
+  `${folderName}`,
 );
 
-enrich(INPUT_FOLDER_PATH);
+enrich(inputFolderPath);

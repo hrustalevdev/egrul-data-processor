@@ -2,6 +2,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { db } from '../db';
+import { isDropDatabase } from '../env';
 
 import { prepareZipFilePaths } from './lib/prepareZipFilePaths';
 import { Progress } from './lib/Progress';
@@ -15,7 +16,7 @@ const workerPool = new WorkerPool(
 export const enrich = async (inputFolderPath: string) => {
   try {
     await db.connect();
-    await db.connection.dropDatabase();
+    if (isDropDatabase) await db.connection.dropDatabase();
 
     const zipFilePaths = prepareZipFilePaths(inputFolderPath);
 
@@ -44,5 +45,6 @@ export const enrich = async (inputFolderPath: string) => {
     console.error('Error during enrich process:', error);
   } finally {
     await db.disconnect();
+    workerPool.close();
   }
 };

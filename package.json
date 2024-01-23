@@ -7,7 +7,9 @@
     "start": "ts-node src/index",
     "build": "tsc",
     "enrich": "tsc && node dist/enrich",
-    "enrich:test": "tsc && NODE_ENV=testing node dist/enrich"
+    "enrich:test": "DROP_DATABASE=true npm run enrich:egrul:test && npm run enrich:egrip:test",
+    "enrich:egrul:test": "tsc && NODE_ENV=testing REGISTRY_TYPE=egrul node dist/enrich",
+    "enrich:egrip:test": "tsc && NODE_ENV=testing REGISTRY_TYPE=egrip node dist/enrich"
   },
   "repository": {
     "type": "git",

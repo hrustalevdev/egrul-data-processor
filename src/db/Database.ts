@@ -1,13 +1,14 @@
 import mongoose from 'mongoose';
 import type { ConnectOptions, Connection } from 'mongoose';
 
+import { isTesting } from '../env';
+
 type TDatabase = typeof mongoose;
 type TConnection = Connection;
 interface IDBOptions extends ConnectOptions {
   url: string;
 }
-const DB_NAME =
-  process.env.NODE_ENV === 'testing' ? 'egrul_egrip_test' : 'egrul_egrip';
+const DB_NAME = isTesting ? 'egrul_egrip_test' : 'egrul_egrip';
 
 const URL = `mongodb://127.0.0.1:27017/${DB_NAME}`;
 
