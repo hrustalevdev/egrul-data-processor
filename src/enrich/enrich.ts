@@ -1,7 +1,16 @@
+import os from 'node:os';
+import path from 'node:path';
+
 import { db } from '../db';
 
 import { prepareZipFilePaths } from './lib/prepareZipFilePaths';
-import { zipProcess } from './lib/zipProcess';
+import { Progress } from './lib/Progress';
+import { WorkerPool } from './lib/worker-pool/WorkerPool';
+
+const workerPool = new WorkerPool(
+  os.availableParallelism(),
+  path.resolve(__dirname, 'lib', 'zipProcess.worker.js'),
+);
 
 export const enrich = async (inputFolderPath: string) => {
   try {
@@ -10,9 +19,25 @@ export const enrich = async (inputFolderPath: string) => {
 
     const zipFilePaths = prepareZipFilePaths(inputFolderPath);
 
-    for (const zipFilePath of zipFilePaths) {
-      await zipProcess(zipFilePath);
-    }
+    const folderName = path.basename(inputFolderPath);
+    const progress = new Progress(folderName, zipFilePaths.length);
+
+    await Promise.all(
+      zipFilePaths.map((zipFilePath) => {
+        return new Promise((resolve, reject) => {
+          workerPool.runTask(zipFilePath, (error, result) => {
+            if (error) {
+              console.error(error);
+              reject(error);
+            } else {
+              console.clear();
+              progress.tick({ file: result });
+              resolve(result);
+            }
+          });
+        });
+      }),
+    );
 
     console.log('Processing finished');
   } catch (error) {

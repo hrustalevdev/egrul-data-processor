@@ -1,8 +1,6 @@
 import JSZip from 'jszip';
 import fs from 'node:fs';
-import path from 'node:path';
 
-import { Progress } from './Progress';
 import { xmlProcess } from './xmlProcess';
 
 export const zipProcess = async (zipFilePath: string) => {
@@ -11,13 +9,9 @@ export const zipProcess = async (zipFilePath: string) => {
     file.name.match(/\.xml$/i),
   );
 
-  const zipFileName = path.basename(zipFilePath);
-  const progress = new Progress(zipFileName, xmlFiles.length);
-
   await Promise.all(
     xmlFiles.map(async (xmlFile) => {
       await xmlProcess(xmlFile);
-      progress.tick();
     }),
   );
 };

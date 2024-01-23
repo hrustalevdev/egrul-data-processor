@@ -3,10 +3,10 @@ import ProgressBar from 'progress';
 export class Progress {
   private readonly _bar: ProgressBar;
 
-  constructor(filename: string, totalFiles: number) {
+  constructor(folderName: string, totalFiles: number) {
     this._bar = new ProgressBar(
-      `Processing "${filename}"`.padEnd(43, ' ') +
-        ': [:bar] :ratexml/s :percent :etas :elapseds',
+      `Processing "${folderName}" folder: ` +
+        '[:bar] :current/:total :percent :etas :elapseds; last_parsed: :file \n',
       {
         complete: '=',
         incomplete: ' ',
@@ -18,7 +18,7 @@ export class Progress {
     this.tick = this.tick.bind(this);
   }
 
-  tick() {
-    this._bar.tick();
+  tick(token?: { file: string }) {
+    this._bar.tick(token);
   }
 }
