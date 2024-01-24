@@ -5,15 +5,17 @@
   "main": "index.js",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
-    "clean:sitemap": "rm -rf ./output/sitemap",
     "confirmation": "echo 'Are you sure? (y/n)' && read -r answer && [ \"$answer\" = \"y\" ]",
-    "enrich": "npm run confirmation && npm run build && DROP_DATABASE=true npm run enrich:egrul && npm run enrich:egrip",
-    "enrich:egrul": "npm run confirmation && npm run build && REGISTRY_TYPE=egrul node dist/enrich",
-    "enrich:egrip": "npm run confirmation && npm run build && REGISTRY_TYPE=egrip node dist/enrich",
-    "enrich:test": "npm run build && DROP_DATABASE=true npm run enrich:egrul:test && npm run enrich:egrip:test",
-    "enrich:egrul:test": "npm run build && NODE_ENV=testing REGISTRY_TYPE=egrul node dist/enrich",
-    "enrich:egrip:test": "npm run build && NODE_ENV=testing REGISTRY_TYPE=egrip node dist/enrich",
-    "sitemap:test": "npm run build && npm run clean:sitemap && NODE_ENV=testing node dist/sitemap-creator"
+    "enrich": "npm run confirmation -s && npm run build -s && DROP_DATABASE=true npm run enrich:egrul -s && npm run enrich:egrip -s",
+    "enrich:egrul": "npm run confirmation -s && npm run build -s && REGISTRY_TYPE=egrul node dist/enrich",
+    "enrich:egrip": "npm run confirmation -s && npm run build -s && REGISTRY_TYPE=egrip node dist/enrich",
+    "enrich:test": "npm run build -s && DROP_DATABASE=true npm run enrich:egrul:test -s && npm run enrich:egrip:test -s",
+    "enrich:egrul:test": "npm run build -s && NODE_ENV=testing REGISTRY_TYPE=egrul node dist/enrich",
+    "enrich:egrip:test": "npm run build -s && NODE_ENV=testing REGISTRY_TYPE=egrip node dist/enrich",
+    "clean:sitemap": "rm -rf ./output/sitemap",
+    "clean:sitemap:test": "rm -rf ./output/_sitemap",
+    "sitemap": "npm run confirmation -s && npm run build && npm run clean:sitemap -s && node dist/sitemap-creator",
+    "sitemap:test": "npm run build -s && npm run clean:sitemap:test -s && NODE_ENV=testing node dist/sitemap-creator"
   },
   "repository": {
     "type": "git",
