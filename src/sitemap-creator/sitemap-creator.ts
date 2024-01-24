@@ -24,20 +24,20 @@ export const sitemapCreator = async (outputFolderPath: string) => {
       .cursor();
 
     const sms = new SitemapAndIndexStream({
-      limit: 45000, // defaults to 45k
-      lastmodDateOnly: false, // print date not time
+      limit: 45000,
+      lastmodDateOnly: false,
       getSitemapStream: (i) => {
         const sitemapStream = new SitemapStream({
-          hostname: 'https://example.com',
+          hostname: 'https://sravni.ru/kontragent/',
         });
         const fileName = `sitemap-${i}.xml`;
 
         const ws = sitemapStream
-          .pipe(createGzip()) // compress the output of the sitemap
-          .pipe(createWriteStream(resolve(outputFolderPath, fileName + '.gz'))); // write it to sitemap-NUMBER.xml
+          .pipe(createGzip())
+          .pipe(createWriteStream(resolve(outputFolderPath, `${fileName}.gz`)));
 
         return [
-          new URL(fileName, 'https://example.com/subdir/').toString(),
+          new URL(fileName, 'https://sravni.ru/kontragent/sitemap/').toString(),
           sitemapStream,
           ws,
         ];
@@ -56,7 +56,7 @@ export const sitemapCreator = async (outputFolderPath: string) => {
       doc = await cursor.next()
     ) {
       const link: SitemapItemLoose = {
-        url: `/kontragent/${[doc.inn, doc.kpp].filter(Boolean).join('-')}/`,
+        url: `${[doc.inn, doc.kpp].filter(Boolean).join('-')}`,
         changefreq: EnumChangefreq.MONTHLY,
         priority: 0.8,
       };
