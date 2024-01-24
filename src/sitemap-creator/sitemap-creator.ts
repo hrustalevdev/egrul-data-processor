@@ -16,15 +16,19 @@ export const sitemapCreator = async (outputFolderPath: string) => {
       mkdirSync(outputFolderPath, { recursive: true });
     }
 
+    const LINKS_PER_SITEMAP = 49500;
+
     const totalDocuments = await Organization.countDocuments();
     console.log(`${'Total documents'.padEnd(15)} :`, totalDocuments);
+    console.log(
+      `${'Total sitemaps'.padEnd(15)} :`,
+      Math.ceil(totalDocuments / LINKS_PER_SITEMAP),
+    );
 
     const cursor = Organization.find({}, { inn: 1, kpp: 1, _id: 0 })
       .lean()
       .cursor()
       .addCursorFlag('noCursorTimeout', true);
-
-    const LINKS_PER_SITEMAP = 49500;
 
     const smsProcess = new ProgressBar(
       `${'Sitemap process'.padEnd(15)} : [:bar] :current/:total :percent :etas :elapseds`,
@@ -75,16 +79,6 @@ export const sitemapCreator = async (outputFolderPath: string) => {
         ),
       );
 
-    const dbProcess = new ProgressBar(
-      `${'Data fetching'.padEnd(15)} : [:bar] :current/:total :percent :etas :elapseds`,
-      {
-        complete: '=',
-        incomplete: ' ',
-        width: 50,
-        total: totalDocuments,
-      },
-    );
-
     for (
       let doc = await cursor.next();
       doc != null;
@@ -95,7 +89,6 @@ export const sitemapCreator = async (outputFolderPath: string) => {
       };
 
       sms.write(link);
-      dbProcess.tick();
     }
 
     sms.end();
