@@ -2,16 +2,12 @@ import path from 'node:path';
 
 import { isTesting } from '../env';
 
-import { sitemapCreator } from './sitemap-creator';
+import { SitemapCreator } from './sitemap-creator';
 
 const folderName = isTesting ? '_sitemap' : 'sitemap';
 
-const outputFolderPath = path.resolve(
-  __dirname,
-  '..',
-  '..',
-  'output',
-  folderName,
-);
-
-sitemapCreator(outputFolderPath);
+SitemapCreator.create({
+  outputFolderPath: path.resolve(__dirname, '..', '..', 'output', folderName),
+  hostname: 'https://www.sravni.ru/kontragent/',
+  linksPerSitemap: 49500,
+});
