@@ -10,22 +10,24 @@ import { db, Organization } from '../db';
 
 interface IOptions {
   outputFolderPath: string;
-  linksPerSitemap: number;
   hostname: string;
-
-  // siteMapIndexFileName: string;
-  // fileNamePrefix: string;
-  // siteMapIndexFileUrl: string;
+  storageUrl: string;
+  fileNamePrefix: string;
+  linksPerSitemap: number;
 }
 
 export class SitemapCreator {
   private readonly outputFolderPath: string;
   private readonly hostname: string;
+  private readonly storageUrl: string;
+  private readonly fileNamePrefix: string;
   private readonly linksPerSitemap: number;
 
   constructor(options: IOptions) {
     this.outputFolderPath = options.outputFolderPath;
     this.hostname = options.hostname;
+    this.storageUrl = options.storageUrl;
+    this.fileNamePrefix = options.fileNamePrefix;
     this.linksPerSitemap = options.linksPerSitemap;
   }
 
@@ -88,31 +90,30 @@ export class SitemapCreator {
             video: false,
           },
         });
-        const fileName = `sitemap-kontragent-${i}.xml.gz`;
 
-        const ws = sitemapStream
+        const fileName = `${this.fileNamePrefix}-${i}.xml.gz`;
+        const outputFilePath = resolve(this.outputFolderPath, fileName);
+
+        const writeStream = sitemapStream
           .pipe(createGzip())
-          .pipe(createWriteStream(resolve(this.outputFolderPath, fileName)));
+          .pipe(createWriteStream(outputFilePath));
 
-        ws.on('finish', () => {
+        writeStream.on('finish', () => {
           processLog.tick();
         });
 
         return [
-          new URL(fileName, 'https://s3.sravni.ru/xml-sitemaps/').toString(),
+          new URL(fileName, this.storageUrl).toString(),
           sitemapStream,
-          ws,
+          writeStream,
         ];
       },
     });
 
-    stream
-      .pipe(createGzip())
-      .pipe(
-        createWriteStream(
-          resolve(this.outputFolderPath, './sitemap-kontragent-index.xml.gz'),
-        ),
-      );
+    const indexFileName = `${this.fileNamePrefix}-index.xml.gz`;
+    const outputIndexFilePath = resolve(this.outputFolderPath, indexFileName);
+
+    stream.pipe(createGzip()).pipe(createWriteStream(outputIndexFilePath));
 
     return stream;
   }
