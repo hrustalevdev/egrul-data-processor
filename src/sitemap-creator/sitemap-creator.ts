@@ -93,7 +93,6 @@ export class SitemapCreator {
 
         const fileName = `${this.fileNamePrefix}-${i}.xml.gz`;
         const outputFilePath = resolve(this.outputFolderPath, fileName);
-
         const writeStream = sitemapStream
           .pipe(createGzip())
           .pipe(createWriteStream(outputFilePath));
@@ -110,10 +109,9 @@ export class SitemapCreator {
       },
     });
 
-    const indexFileName = `${this.fileNamePrefix}-index.xml.gz`;
+    const indexFileName = `${this.fileNamePrefix}-index.xml`;
     const outputIndexFilePath = resolve(this.outputFolderPath, indexFileName);
-
-    stream.pipe(createGzip()).pipe(createWriteStream(outputIndexFilePath));
+    stream.pipe(createWriteStream(outputIndexFilePath));
 
     return stream;
   }
