@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { isTesting } from '../env';
 
-import { SitemapCreator } from './sitemap-creator';
+import { SitemapCreator } from './SitemapCreator';
 
 const folderName = isTesting ? '_sitemap' : 'sitemap';
 
