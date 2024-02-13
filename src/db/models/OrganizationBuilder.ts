@@ -1,4 +1,8 @@
-import type { IOrganization, IOrganizationName } from './Organization';
+import type {
+  IMainOkved,
+  IOrganization,
+  IOrganizationName,
+} from './Organization';
 
 export class OrganizationBuilder implements IOrganization {
   ogrn: string;
@@ -7,6 +11,8 @@ export class OrganizationBuilder implements IOrganization {
   opf?: string;
   inn?: string;
   kpp?: string;
+  email?: string;
+  mainOkved?: IMainOkved;
 
   constructor(
     ogrn: string,
@@ -35,6 +41,19 @@ export class OrganizationBuilder implements IOrganization {
     return this;
   }
 
+  setEmail(email: string): OrganizationBuilder {
+    this.email = email;
+    return this;
+  }
+
+  setMainOkved(code: string, name: string): OrganizationBuilder {
+    this.mainOkved = {
+      code,
+      name,
+    };
+    return this;
+  }
+
   build(): IOrganization {
     return {
       inn: this.inn,
@@ -43,6 +62,8 @@ export class OrganizationBuilder implements IOrganization {
       name: this.name,
       opf: this.opf,
       kpp: this.kpp,
+      email: this.email,
+      mainOkved: this.mainOkved,
     };
   }
 }

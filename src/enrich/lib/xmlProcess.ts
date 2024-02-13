@@ -31,14 +31,29 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
           organization = new OrganizationBuilder(ogrn, ogrnDate, opf, inn, kpp);
           break;
         }
+
         case 'СвНаимЮЛ': {
           const fullName = node.attributes['НаимЮЛПолн'] as string;
           organization?.setFullName(fullName);
           break;
         }
+
         case 'СвНаимЮЛСокр': {
           const shortName = node.attributes['НаимСокр'] as string;
           organization?.setShortName(shortName);
+          break;
+        }
+
+        case 'СвАдрЭлПочты': {
+          const email = node.attributes['E-mail'] as string;
+          organization?.setEmail(email);
+          break;
+        }
+
+        case 'СвОКВЭДОсн': {
+          const code = node.attributes['КодОКВЭД'] as string;
+          const name = node.attributes['НаимОКВЭД'] as string;
+          organization?.setMainOkved(code, name);
           break;
         }
       }
@@ -57,6 +72,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
           organization = new OrganizationBuilder(ogrn, ogrnDate, opf, inn);
           break;
         }
+
         case 'ФИОРус': {
           const lastName = node.attributes['Фамилия'] as string;
           const firstName = node.attributes['Имя'] as string;
@@ -67,6 +83,19 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
             .join(' ');
 
           organization?.setFullName(fullName);
+          break;
+        }
+
+        case 'СвАдрЭлПочты': {
+          const email = node.attributes['E-mail'] as string;
+          organization?.setEmail(email);
+          break;
+        }
+
+        case 'СвОКВЭДОсн': {
+          const code = node.attributes['КодОКВЭД'] as string;
+          const name = node.attributes['НаимОКВЭД'] as string;
+          organization?.setMainOkved(code, name);
           break;
         }
       }

@@ -5,6 +5,11 @@ export interface IOrganizationName {
   full: string;
 }
 
+export interface IMainOkved {
+  code: string;
+  name: string;
+}
+
 export interface IOrganization {
   ogrn: string;
   ogrnDate: Date;
@@ -12,11 +17,18 @@ export interface IOrganization {
   opf?: string;
   inn?: string;
   kpp?: string;
+  email?: string;
+  mainOkved?: IMainOkved;
 }
 
 const organizationNameSchema = new Schema<IOrganizationName>({
   short: String,
   full: { type: String, required: true },
+});
+
+const mainOkvedSchema = new Schema<IMainOkved>({
+  code: { type: String, required: true },
+  name: { type: String, required: true },
 });
 
 const organizationSchema = new Schema<IOrganization>({
@@ -26,6 +38,8 @@ const organizationSchema = new Schema<IOrganization>({
   opf: String,
   inn: String,
   kpp: String,
+  email: String,
+  mainOkved: mainOkvedSchema,
 });
 
 export const Organization = model<IOrganization>(
