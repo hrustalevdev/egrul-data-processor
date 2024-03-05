@@ -15,7 +15,9 @@
     "clean:sitemap": "rm -rf ./output/sitemap",
     "clean:sitemap:test": "rm -rf ./output/_sitemap",
     "sitemap": "npm run confirmation -s && npm run build -s && npm run clean:sitemap -s && node dist/sitemap-creator",
-    "sitemap:test": "npm run build -s && npm run clean:sitemap:test -s && NODE_ENV=testing node dist/sitemap-creator"
+    "sitemap:test": "npm run build -s && npm run clean:sitemap:test -s && NODE_ENV=testing node dist/sitemap-creator",
+    "clean:links": "rm -rf ./output/links",
+    "links": "npm run confirmation -s && npm run build -s && npm run clean:links -s && node dist/links-creator"
   },
   "repository": {
     "type": "git",
