@@ -1,7 +1,7 @@
 import type { IAddressItem } from './addresses';
 
-type UType = 'LEGAL' | 'INDIVIDUAL';
-type UStatus =
+export type UType = 'LEGAL' | 'INDIVIDUAL';
+export type UStatus =
   | 'ACTIVE'
   | 'LIQUIDATING'
   | 'LIQUIDATED'
@@ -21,10 +21,10 @@ export interface IBaseOrganizationData {
   type: UType;
   name: {
     full_with_opf: string;
-    short_with_opf: string;
-    latin: unknown;
-    full: string;
-    short: string;
+    short_with_opf?: string;
+    latin?: unknown;
+    full?: string;
+    short?: string;
   };
   /** ФИО индивидуального предпринимателя */
   fio?: {
@@ -55,9 +55,9 @@ export interface IBaseOrganizationData {
   branch_type: UBranchType;
   address?: IAddressItem;
   state: {
-    actuality_date: number;
-    registration_date: number;
-    liquidation_date: unknown;
+    actuality_date?: number;
+    registration_date?: number;
+    liquidation_date?: unknown;
     status: UStatus;
   };
 }
@@ -157,6 +157,7 @@ export interface IFullOrganizationData extends IBaseOrganizationData {
     };
   }>;
   managers: Array<Record<string, unknown>>;
+  /** Уставной капитал */
   capital: { type: string; value: number };
   documents: {
     /** Свидетельство о регистрации в налоговой */

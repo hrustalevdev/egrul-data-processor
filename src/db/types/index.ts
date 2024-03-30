@@ -3,4 +3,6 @@ export {
   IFullOrganizationData,
   IRegistrationDocument,
   IAuthority,
+  UType,
+  UStatus,
 } from './organizations';

@@ -30,20 +30,69 @@ const Okved = new Schema({
 });
 
 const FullOrganizationData = new Schema<IFullOrganizationData>({
+  inn: String,
+  kpp: String,
+  ogrn: String,
+  ogrn_date: Number,
   type: ['LEGAL', 'INDIVIDUAL'],
   name: {
     short_with_opf: String,
     full_with_opf: String,
   },
-  inn: String,
-  ogrn: String,
-  ogrn_date: Number,
+  okato: String,
+  oktmo: String,
   okpo: String,
   okogu: String,
-  oktmo: String,
-  okato: String,
+  okfs: String,
+  management: {
+    name: String,
+    post: String,
+  },
+  address: {
+    unrestricted_value: String,
+  },
   state: {
     status: ['ACTIVE', 'BANKRUPT', 'LIQUIDATED', 'LIQUIDATING', 'REORGANIZING'],
+  },
+  citizenship: {
+    name: {
+      full: String,
+    },
+  },
+  okveds: [Okved],
+  authorities: {
+    fts_registration: Authority,
+    pf: Authority,
+    sif: Authority,
+  },
+  founders: [
+    {
+      name: String,
+      fio: [
+        String,
+        {
+          surname: String,
+          name: String,
+          patronymic: String,
+        },
+      ],
+      type: ['LEGAL', 'PHYSICAL'],
+      share: {
+        type: ['DECIMAL', 'PERCENT', 'FRACTION'],
+        value: Number,
+        numerator: Number,
+        denominator: Number,
+      },
+    },
+  ],
+  capital: {
+    type: String,
+    value: Number,
+  },
+  documents: {
+    fts_registration: RegistrationDocument,
+    fts_report: RegistrationDocument,
+    pf_registration: RegistrationDocument,
   },
   emails: [
     {
@@ -54,54 +103,6 @@ const FullOrganizationData = new Schema<IFullOrganizationData>({
       },
     },
   ],
-  citizenship: {
-    name: {
-      full: String,
-    },
-  },
-  address: {
-    unrestricted_value: String,
-  },
-  management: {
-    post: String,
-    name: String,
-  },
-  founders: [
-    {
-      type: ['LEGAL', 'PHYSICAL'],
-      name: String,
-      fio: [
-        String,
-        {
-          surname: String,
-          name: String,
-          patronymic: String,
-        },
-      ],
-      share: {
-        type: ['DECIMAL', 'PERCENT', 'FRACTION'],
-        value: Number,
-        numerator: Number,
-        denominator: Number,
-      },
-    },
-  ],
-  documents: {
-    fts_registration: RegistrationDocument,
-    fts_report: RegistrationDocument,
-    pf_registration: RegistrationDocument,
-  },
-  authorities: {
-    fts_registration: Authority,
-    pf: Authority,
-    sif: Authority,
-  },
-  okfs: String,
-  capital: {
-    type: String,
-    value: Number,
-  },
-  okveds: [Okved],
 });
 
 const contractorSchema = new Schema<TFullOrganizationDataItem>({
