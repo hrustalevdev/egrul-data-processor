@@ -2,7 +2,7 @@ import type {
   IMainOkved,
   IOrganization,
   IOrganizationName,
-} from './Organization';
+} from '../models/Organization';
 
 export class OrganizationBuilder implements IOrganization {
   ogrn: string;
