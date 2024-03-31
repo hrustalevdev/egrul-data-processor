@@ -4,7 +4,6 @@ import type {
   IAuthority,
   IFullOrganizationData,
   TFullOrganizationDataItem,
-  UStatus,
   UType,
 } from '../types';
 
@@ -59,7 +58,11 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
   ) {}
 
   static init() {
-    return new this('', '', {} as IFullOrganizationData);
+    return new this('', '', {
+      state: {
+        status: 'ACTIVE',
+      },
+    } as IFullOrganizationData);
   }
 
   /**
@@ -70,6 +73,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
    * П - text
    * O - required
    * H - optional
+   * K - classifier or dictionary
    */
 
   /** C: СвНаимЮЛ; A_O: НаимЮЛПолн */
@@ -170,31 +174,31 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  /** C: ГородСелПоселен A_O: ВидКод, Наим */
+  /** C: ГородСелПоселен; A_O: ВидКод, Наим */
   setSettlement(kind: UKind, settlement: string) {
     this._address.settlement = `${this._municipalAreaKind[kind]} ${settlement}`;
     return this;
   }
 
-  /** C: НаселенПункт A_O: Вид, Наим */
+  /** C: НаселенПункт; A_O: Вид, Наим */
   setLocality(kind: string, locality: string) {
     this._address.locality = `${kind} ${locality}`;
     return this;
   }
 
-  /** С: ЭлПланСтруктур A_O: Тип, Наим */
+  /** С: ЭлПланСтруктур; A_O: Тип, Наим */
   setDistrict(kind: string, district: string) {
     this._address.district = `${kind} ${district}`;
     return this;
   }
 
-  /** С: ЭлУлДорСети A_O: Тип, Наим */
+  /** С: ЭлУлДорСети; A_O: Тип, Наим */
   setStreet(kind: string, street: string) {
     this._address.street = `${kind} ${street}`;
     return this;
   }
 
-  /** С: Здание A_O: Тип, Номер */
+  /** С: Здание; A_O: Тип, Номер */
   setBuilding(kind: string, number: string) {
     const bNumber = `${kind} ${number}`;
 
@@ -206,22 +210,22 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  /** С: ПомещЗдания A_O: Тип, Номер */
+  /** С: ПомещЗдания; A_O: Тип, Номер */
   setApartment(kind: string, number: string) {
     this._address.apartment = `${kind} ${number}`;
     return this;
   }
 
-  /** С: ПомещКвартиры A_O: Тип, Номер */
+  /** С: ПомещКвартиры; A_O: Тип, Номер */
   setRoom(kind: string, number: string) {
     this._address.room = `${kind} ${number}`;
     return this;
   }
 
-  /** Here */
-  setStatus(status: UStatus) {
+  /** С: СвСтатус; A_OK: КодСтатусЮЛ  */
+  setStatus(code: string) {
     this.data.state = {
-      status,
+      status: this._statusCodesMap[code].status || 'ACTIVE',
     };
 
     return this;
