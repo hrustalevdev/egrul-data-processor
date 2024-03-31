@@ -59,9 +59,8 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
 
   static init() {
     return new this('', '', {
-      state: {
-        status: 'ACTIVE',
-      },
+      state: { status: 'ACTIVE' },
+      authorities: {},
     } as IFullOrganizationData);
   }
 
@@ -256,21 +255,15 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  /** C: `СвНО`; A_OK: КодНО, НаимНО */
+  /** C: СвНО; A_OK: КодНО, НаимНО */
   setFts(code: string, name: string) {
-    this.data.authorities = {
-      fts_registration: {
-        code,
-        name,
-      },
-    };
-
+    this.data.authorities.fts_registration = { code, name };
     return this;
   }
 
-  /** tag: `СвОргПФ`; attr: `КодПФ`, `НаимПФ` */
-  setPf(authority: IAuthority) {
-    this.data.authorities.pf = authority;
+  /** C: СвОргПФ; A_OK: КодПФ, НаимПФ */
+  setPf(code: string, name: string) {
+    this.data.authorities.pf = { code, name };
     return this;
   }
 
