@@ -222,10 +222,10 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  /** С: СвСтатус; A_OK: КодСтатусЮЛ  */
+  /** С: СвСтатус; A_OK: КодСтатусЮЛ | КодСтатус (для ИП) */
   setStatus(code: string) {
     this.data.state = {
-      status: this._statusCodesMap[code].status || 'ACTIVE',
+      status: this._statusCodesMap[code]?.status || 'ACTIVE',
     };
 
     return this;
