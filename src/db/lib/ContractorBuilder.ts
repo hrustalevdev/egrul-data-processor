@@ -232,12 +232,14 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
   }
 
   /**
-   * Гражданство ИП.
-   * @param citizenship - полное наименование страны.
+   * Гражданство ИП
+   * C: СвГражд; A_OK: ВидГражд; A_H: НаимСтран
    */
-  setCitizenship(citizenship: string) {
+  setCitizenship(kind: string, country?: string) {
+    const countryName = kind === '1' ? 'Российская Федерация' : country || '';
+
     this.data.citizenship = {
-      name: { full: citizenship },
+      name: { full: countryName },
     } as IFullOrganizationData['citizenship'];
 
     return this;
