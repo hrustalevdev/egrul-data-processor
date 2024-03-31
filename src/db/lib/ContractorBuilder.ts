@@ -30,8 +30,24 @@ interface IAddress {
   room?: string;
 }
 
+type UKind = '1' | '2' | '3' | '4';
+type TMunicipalAreaKind = Record<UKind, string>;
+type TSettlementKind = TMunicipalAreaKind;
+
 export class ContractorBuilder implements TFullOrganizationDataItem {
   private readonly _address: IAddress = {};
+  private readonly _municipalAreaKind: TMunicipalAreaKind = {
+    '1': 'муниципальный район',
+    '2': 'городской округ',
+    '3': 'внутригородская территория города федерального значения',
+    '4': 'муниципальный округ',
+  };
+  private readonly _settlementKind: TSettlementKind = {
+    '1': 'городское поселение',
+    '2': 'сельское поселение',
+    '3': 'межселенная территория в составе муниципального района',
+    '4': 'внутригородской район городского округа',
+  };
 
   constructor(
     public value: string,
@@ -140,53 +156,64 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
   }
 
   /** С_П: НаимРегион */
-  setAddrRegion(id: string) {
-    this._address.region = id;
+  setAddrRegion(region: string) {
+    this._address.region = region;
     return this;
   }
 
-  setMunicipalArea(area: string) {
-    this._address.municipalArea = area;
-    return this;
-  }
-  setSettlement(settlement: string) {
-    this._address.settlement = settlement;
-    return this;
-  }
-  setLocality(locality: string) {
-    this._address.locality = locality;
-    return this;
-  }
-  setDistrict(district: string) {
-    this._address.district = district;
-    return this;
-  }
-  setStreet(street: string) {
-    this._address.street = street;
-    return this;
-  }
-  setBuilding(building: string) {
-    this._address.building = building;
-    return this;
-  }
-  setApartment(apartment: string) {
-    this._address.apartment = apartment;
-    return this;
-  }
-  setRoom(room: string) {
-    this._address.room = room;
+  /** С: МуниципРайон; A_O: ВидКод, Наим */
+  setMunicipalArea(kind: UKind, area: string) {
+    this._address.municipalArea = `${this._municipalAreaKind[kind]} ${area}`;
     return this;
   }
 
-  // setAddress(address: string) {
-  //   this.data.address = {
-  //     value: address,
-  //     unrestricted_value: address,
-  //     data: {} as IAddressItem['data'],
-  //   };
-  //
-  //   return this;
-  // }
+  /** C: ГородСелПоселен A_O: ВидКод, Наим */
+  setSettlement(kind: UKind, settlement: string) {
+    this._address.settlement = `${this._municipalAreaKind[kind]} ${settlement}`;
+    return this;
+  }
+
+  /** C: НаселенПункт A_O: Вид, Наим */
+  setLocality(kind: string, locality: string) {
+    this._address.locality = `${kind} ${locality}`;
+    return this;
+  }
+
+  /** С: ЭлПланСтруктур A_O: Тип, Наим */
+  setDistrict(kind: string, district: string) {
+    this._address.district = `${kind} ${district}`;
+    return this;
+  }
+
+  /** С: ЭлУлДорСети A_O: Тип, Наим */
+  setStreet(kind: string, street: string) {
+    this._address.street = `${kind} ${street}`;
+    return this;
+  }
+
+  /** С: Здание A_O: Тип, Номер */
+  setBuilding(kind: string, number: string) {
+    const bNumber = `${kind} ${number}`;
+
+    this._address.building =
+      this._address.building ?
+        `${this._address.building}, ${bNumber}`
+      : bNumber;
+
+    return this;
+  }
+
+  /** С: ПомещЗдания A_O: Тип, Номер */
+  setApartment(kind: string, number: string) {
+    this._address.apartment = `${kind} ${number}`;
+    return this;
+  }
+
+  /** С: ПомещКвартиры A_O: Тип, Номер */
+  setRoom(kind: string, number: string) {
+    this._address.room = `${kind} ${number}`;
+    return this;
+  }
 
   setStatus(status: UStatus) {
     this.data.state = {
@@ -238,8 +265,17 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
   }
 
   // TODO: вернуться и поля и методы! Критично?
-  // TODO: собрать строку адреса из `_address`
   build() {
+    // TODO: собрать строку адреса из `_address`
+    // setAddress(address: string) {
+    //   this.data.address = {
+    //     value: address,
+    //     unrestricted_value: address,
+    //     data: {} as IAddressItem['data'],
+    //   };
+    //
+    //   return this;
+    // }
     return this;
   }
 }
