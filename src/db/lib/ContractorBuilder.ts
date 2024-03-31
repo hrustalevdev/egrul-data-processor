@@ -1,7 +1,6 @@
 import { getTime, parse } from 'date-fns';
 
 import type {
-  IAuthority,
   IFullOrganizationData,
   TFullOrganizationDataItem,
   UType,
@@ -267,9 +266,9 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  /** tag: `СвОргФСС`; attr: `КодФСС`, `НаимФСС` */
-  setSif(authority: IAuthority) {
-    this.data.authorities.sif = authority;
+  /** C: СвОргФСС; A_OK: КодФСС, НаимФСС */
+  setSif(code: string, name: string) {
+    this.data.authorities.sif = { code, name };
     return this;
   }
 
