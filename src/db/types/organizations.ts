@@ -134,18 +134,18 @@ export interface IFullOrganizationData extends IBaseOrganizationData {
   /** Учредители компании */
   founders: Array<{
     /** ОГРН учредителя (для юр.лиц) */
-    ogrn: string;
+    ogrn?: string;
     /** ИНН учредителя */
-    inn: string;
+    inn?: string;
     /** Наименование учредителя (для юр.лиц) */
-    name: string;
+    name?: string;
     /** ФИО учредителя (для физ.лиц) */
-    fio: string | { surname: string; name: string; patronymic: string };
+    fio?: string | { surname: string; name: string; patronymic: string };
     /** Внутренний идентификатор */
-    hid: string;
+    hid?: string;
     /** Тип учредителя (LEGAL / PHYSICAL) */
-    type: 'LEGAL' | 'PHYSICAL';
-    share: {
+    type?: 'LEGAL' | 'PHYSICAL';
+    share?: {
       /** Тип значения (PERCENT / DECIMAL / FRACTION) */
       type: 'PERCENT' | 'DECIMAL' | 'FRACTION';
       /** Значение (для type = PERCENT и type = DECIMAL) */

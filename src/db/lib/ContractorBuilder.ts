@@ -72,6 +72,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
    * O - required
    * H - optional
    * K - classifier or dictionary
+   * M - many
    */
 
   /** C: СвНаимЮЛ; A_O: НаимЮЛПолн */
@@ -269,6 +270,22 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
   /** C: СвОргФСС; A_OK: КодФСС, НаимФСС */
   setSif(code: string, name: string) {
     this.data.authorities.sif = { code, name };
+    return this;
+  }
+
+  /**
+   * // TODO: разобраться в конце
+   * C: НаимИННЮЛ; A_H: ОГРН, ИНН, НаимЮЛПолн
+   */
+  setFounders({ ogrn, inn, name, type }: IFullOrganizationData['founders'][0]) {
+    this.data.founders ?
+      this.data.founders.push({ ogrn, inn, name, type })
+    : [this.data.founders];
+  }
+
+  /** C: СвУстКап; A_ОК: НаимВидКап; A_O: СумКап */
+  setCapital(type: string, value: string) {
+    this.data.capital = { type, value: Number(value) };
     return this;
   }
 
