@@ -1,6 +1,7 @@
 import { getTime, parse } from 'date-fns';
 
 import type {
+  IAuthority,
   IFullOrganizationData,
   TFullOrganizationDataItem,
   UStatus,
@@ -19,28 +20,48 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return new this('', '', {} as IFullOrganizationData);
   }
 
+  /**
+   * Описание типов данных
+   * @link - https://sudact.ru/law/prikaz-fns-rossii-ot-18012021-n-ed-7-1417/
+   * C - tag
+   * A - attr
+   * O - required
+   * H - optional
+   */
+
+  /** C: СвНаимЮЛ; A_O: НаимЮЛПолн */
   setValue(value: string) {
     this.value = value;
     this.unrestricted_value = value;
     return this;
   }
 
+  /**
+   * C: СвЮЛ; A_H: ИНН
+   * C: СвУчетНО; A_O: ИНН
+   */
   setInn(inn: string) {
     this.data.inn = inn;
     return this;
   }
 
+  /**
+   * C: СвЮЛ; A_H: КПП
+   * C: СвУчетНО; A_O: КПП
+   */
   setKpp(kpp: string) {
     this.data.kpp = kpp;
     return this;
   }
 
+  /** C: СвЮЛ; A_O: ОГРН */
   setOgrn(ogrn: string) {
     this.data.ogrn = ogrn;
     return this;
   }
 
   /**
+   * C: СвЮЛ; A_O: ДатаОГРН
    * Преобразовываем полученную дату в миллисекунды.
    * @param ogrnDate - `yyyy-MM-dd`, ex.: `2023-12-30`.
    */
@@ -50,11 +71,13 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
+  /** "LEGAL" | "INDIVIDUAL" */
   setType(type: UType) {
     this.data.type = type;
     return this;
   }
 
+  /** C: СвНаимЮЛ; A_O: НаимЮЛПолн */
   setFullNameWithOpf(name: string) {
     this.data.name = {
       full_with_opf: name,
@@ -62,33 +85,9 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
+  /** C: СвНаимЮЛ; A_O: НаимЮЛСокр */
   setShortNameWithOpf(name: string) {
     this.data.name.short_with_opf = name;
-    return this;
-  }
-
-  setOkato(okato: string) {
-    this.data.okato = okato;
-    return this;
-  }
-
-  setOktmo(oktmo: string) {
-    this.data.oktmo = oktmo;
-    return this;
-  }
-
-  setOkpo(okpo: string) {
-    this.data.okpo = okpo;
-    return this;
-  }
-
-  setOkogu(okogu: string) {
-    this.data.okogu = okogu;
-    return this;
-  }
-
-  setOkfs(okfs: string) {
-    this.data.okfs = okfs;
     return this;
   }
 
@@ -140,6 +139,28 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
+  /** tag: `СвНО`; attr: `КодНО`, `НаимНО` */
+  setFts(authority: IAuthority) {
+    this.data.authorities = {
+      fts_registration: authority,
+    };
+
+    return this;
+  }
+
+  /** tag: `СвОргПФ`; attr: `КодПФ`, `НаимПФ` */
+  setPf(authority: IAuthority) {
+    this.data.authorities.pf = authority;
+    return this;
+  }
+
+  /** tag: `СвОргФСС`; attr: `КодФСС`, `НаимФСС` */
+  setSif(authority: IAuthority) {
+    this.data.authorities.sif = authority;
+    return this;
+  }
+
+  // TODO: вернуться и поля и методы! Критично?
   build() {
     return this;
   }

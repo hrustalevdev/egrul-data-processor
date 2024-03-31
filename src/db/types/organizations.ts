@@ -64,12 +64,12 @@ export interface IBaseOrganizationData {
 
 export interface IAuthority {
   /** Код гос. органа */
-  type: string;
+  type?: string;
   /** Код отделения */
   code: string;
   /** Наименование отделения */
   name: string;
-  address: string;
+  address?: string;
 }
 
 export interface IRegistrationDocument {
@@ -127,9 +127,9 @@ export interface IFullOrganizationData extends IBaseOrganizationData {
     /** Сведения о налоговом органе */
     fts_registration: IAuthority;
     /** Отделение Пенсионного фонда */
-    pf: IAuthority;
+    pf?: IAuthority;
     /** Отделение Фонда соц. страхования */
-    sif: IAuthority;
+    sif?: IAuthority;
   };
   /** Учредители компании */
   founders: Array<{
