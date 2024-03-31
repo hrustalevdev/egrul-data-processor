@@ -256,10 +256,13 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  /** tag: `СвНО`; attr: `КодНО`, `НаимНО` */
-  setFts(authority: IAuthority) {
+  /** C: `СвНО`; A_OK: КодНО, НаимНО */
+  setFts(code: string, name: string) {
     this.data.authorities = {
-      fts_registration: authority,
+      fts_registration: {
+        code,
+        name,
+      },
     };
 
     return this;
