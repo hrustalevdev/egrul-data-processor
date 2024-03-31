@@ -245,7 +245,10 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  setOkved(okved: IFullOrganizationData['okveds'][0]) {
+  /** С: СвОКВЭДОсн | СвОКВЭДДоп; A_OK: КодОКВЭД; A_O: НаимОКВЭД; A_HK: ПрВерсОКВЭД */
+  setOkved(isMain: boolean, code: string, name: string, type = '2001') {
+    const okved = { main: isMain, type, code, name };
+
     this.data.okveds ?
       this.data.okveds.push(okved)
     : (this.data.okveds = [okved]);
