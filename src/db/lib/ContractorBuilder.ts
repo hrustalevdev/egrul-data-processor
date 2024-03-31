@@ -8,6 +8,8 @@ import type {
   UType,
 } from '../types';
 
+import { statusCodesMap } from './statusCodesMap';
+
 interface IAddress {
   postalCode?: string;
   regionId?: string;
@@ -48,6 +50,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     '3': 'межселенная территория в составе муниципального района',
     '4': 'внутригородской район городского округа',
   };
+  private readonly _statusCodesMap = statusCodesMap;
 
   constructor(
     public value: string,
@@ -215,6 +218,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
+  /** Here */
   setStatus(status: UStatus) {
     this.data.state = {
       status,
