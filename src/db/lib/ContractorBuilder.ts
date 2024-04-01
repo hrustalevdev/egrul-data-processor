@@ -81,6 +81,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
   setValue(value: string) {
     this.value = value;
     this.unrestricted_value = value;
+
     return this;
   }
 
@@ -125,6 +126,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     this.data.name = {
       full_with_opf: name,
     };
+
     return this;
   }
 
@@ -286,6 +288,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
   setFtsDocumentAuthority(authority: string) {
     this._ftsRegDocument.type = 'FTS_REGISTRATION';
     this._ftsRegDocument.issue_authority = authority;
+
     return this;
   }
 
@@ -294,24 +297,28 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     this._ftsRegDocument.series = series;
     this._ftsRegDocument.number = number;
     this._ftsRegDocument.issue_date = this._getTimestamp(date);
+
     return this;
   }
 
-  // TODO: вернуться и поля и методы! Критично?
   build() {
-    // TODO: fts_registration: this._ftsRegDocument if !this._isEmptyObj(obj)
+    const { value, unrestricted_value, data } = this;
+    const address = this._prepareAddress(this._address);
+    const fts_registration = this._ftsRegDocument;
 
-    return this;
-  }
+    // TODO: founders, ?documents.fts_report, documents.pf_registration
 
-  /**
-   * Преобразовывает полученную дату в миллисекунды.
-   * @param date - `yyyy-MM-dd`, ex.: `2023-12-30`.
-   * @private
-   */
-  private _getTimestamp(date: string) {
-    const parsedDate = parse(date, 'yyyy-MM-dd', new Date());
-    return getTime(parsedDate);
+    return {
+      value,
+      unrestricted_value,
+      data: {
+        ...data,
+        ...(!this._isEmptyObj(address) && { address }),
+        ...(!this._isEmptyObj(fts_registration) && {
+          documents: { fts_registration },
+        }),
+      },
+    } as TFullOrganizationDataItem;
   }
 
   private _prepareAddress({
@@ -352,6 +359,16 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
       unrestricted_value: source,
       data,
     };
+  }
+
+  /**
+   * Преобразовывает полученную дату в миллисекунды.
+   * @param date - `yyyy-MM-dd`, ex.: `2023-12-30`.
+   * @private
+   */
+  private _getTimestamp(date: string) {
+    const parsedDate = parse(date, 'yyyy-MM-dd', new Date());
+    return getTime(parsedDate);
   }
 
   private _isEmptyObj(obj: object) {
