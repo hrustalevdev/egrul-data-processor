@@ -107,6 +107,69 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         break;
       }
 
+      case 'ГородСелПоселен': {
+        if (!openTags.has('СвАдресЮЛ')) return;
+
+        const kind = tag.attributes['ВидКод'] as UAreaKind;
+        const settlement = tag.attributes['Наим'] as string;
+        contractor?.setSettlement(kind, settlement);
+        break;
+      }
+
+      case 'НаселенПункт': {
+        if (!openTags.has('СвАдресЮЛ')) return;
+
+        const kind = tag.attributes['Вид'] as string;
+        const locality = tag.attributes['Наим'] as string;
+        contractor?.setLocality(kind, locality);
+        break;
+      }
+
+      case 'ЭлПланСтруктур': {
+        if (!openTags.has('СвАдресЮЛ')) return;
+
+        const kind = tag.attributes['Тип'] as string;
+        const district = tag.attributes['Наим'] as string;
+        contractor?.setDistrict(kind, district);
+        break;
+      }
+
+      case 'ЭлУлДорСети': {
+        if (!openTags.has('СвАдресЮЛ')) return;
+
+        const kind = tag.attributes['Тип'] as string;
+        const street = tag.attributes['Наим'] as string;
+        contractor?.setStreet(kind, street);
+        break;
+      }
+
+      case 'Здание': {
+        if (!openTags.has('СвАдресЮЛ')) return;
+
+        const kind = tag.attributes['Тип'] as string;
+        const number = tag.attributes['Номер'] as string;
+        contractor?.setBuilding(kind, number);
+        break;
+      }
+
+      case 'ПомещЗдания': {
+        if (!openTags.has('СвАдресЮЛ')) return;
+
+        const kind = tag.attributes['Тип'] as string;
+        const number = tag.attributes['Номер'] as string;
+        contractor?.setApartment(kind, number);
+        break;
+      }
+
+      case 'ПомещКвартиры': {
+        if (!openTags.has('СвАдресЮЛ')) return;
+
+        const kind = tag.attributes['Тип'] as string;
+        const number = tag.attributes['Номер'] as string;
+        contractor?.setRoom(kind, number);
+        break;
+      }
+
       // TODO: добавить мыло
       // case 'СвАдрЭлПочты': {
       //   const email = tag.attributes['E-mail'] as string;
