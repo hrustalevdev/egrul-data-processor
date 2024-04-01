@@ -124,8 +124,10 @@ export interface IFullOrganizationData extends IBaseOrganizationData {
     name: string;
   }>;
   authorities: {
-    /** Сведения о налоговом органе */
+    /** Сведения о регистрирующем органе по месту нахождения */
     fts_registration: IAuthority;
+    /** Сведения об учете в налоговом органе */
+    fts_report: IAuthority;
     /** Отделение Пенсионного фонда */
     pf?: IAuthority;
     /** Отделение Фонда соц. страхования */

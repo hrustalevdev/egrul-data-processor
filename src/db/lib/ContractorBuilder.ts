@@ -246,9 +246,17 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  /** C: СвНО; A_OK: КодНО, НаимНО */
-  setFts(code: string, name: string) {
-    this.data.authorities.fts_registration = { code, name };
+  /** C: СвРегОрг; A_OK: КодНО, НаимНО; A_H: АдрРО */
+  setFtsRegistration(code: string, name: string, address: string) {
+    if (this.data.authorities.fts_registration) return;
+
+    this.data.authorities.fts_registration = { code, name, address };
+    return this;
+  }
+
+  /** C: СвУчетНО > СвНО; A_OK: КодНО, НаимНО */
+  setFtsReport(code: string, name: string) {
+    this.data.authorities.fts_report = { code, name };
     return this;
   }
 
@@ -301,7 +309,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
 
   build() {
     const { value, unrestricted_value, data } = this;
-    const address = this._prepareAddress(this._address);
+    const address = this._address;
     const fts_registration = this._ftsRegDocument;
 
     // TODO: founders, ?documents.fts_report, documents.pf_registration
@@ -311,7 +319,9 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
       unrestricted_value,
       data: {
         ...data,
-        ...(!this._isEmptyObj(address) && { address }),
+        ...(!this._isEmptyObj(address) && {
+          address: this._prepareAddress(address),
+        }),
         ...(!this._isEmptyObj(fts_registration) && {
           documents: { fts_registration },
         }),

@@ -170,6 +170,39 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         break;
       }
 
+      case 'СвСтатус': {
+        const code = tag.attributes['КодСтатусЮЛ'] as string;
+        contractor?.setStatus(code);
+        break;
+      }
+
+      case 'СвОКВЭДОсн':
+      case 'СвОКВЭДДоп': {
+        const isMain = openTags.has('СвОКВЭДОсн');
+        const code = tag.attributes['КодОКВЭД'] as string;
+        const name = tag.attributes['НаимОКВЭД'] as string;
+        const type = tag.attributes['ПрВерсОКВЭД'] as string;
+        contractor?.setOkved(isMain, code, name, type);
+        break;
+      }
+
+      case 'СвРегОрг': {
+        const code = tag.attributes['КодНО'] as string;
+        const name = tag.attributes['НаимНО'] as string;
+        const address = tag.attributes['АдрРО'] as string;
+        contractor?.setFtsRegistration(code, name, address);
+        break;
+      }
+
+      case 'СвНО': {
+        if (!openTags.has('СвУчетНО')) return;
+
+        const code = tag.attributes['КодНО'] as string;
+        const name = tag.attributes['НаимНО'] as string;
+        contractor?.setFtsReport(code, name);
+        break;
+      }
+
       // TODO: добавить мыло
       // case 'СвАдрЭлПочты': {
       //   const email = tag.attributes['E-mail'] as string;

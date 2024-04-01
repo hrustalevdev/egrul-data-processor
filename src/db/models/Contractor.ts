@@ -62,6 +62,7 @@ const FullOrganizationData = new Schema<IFullOrganizationData>({
   okveds: [Okved],
   authorities: {
     fts_registration: Authority,
+    fts_report: Authority,
     pf: Authority,
     sif: Authority,
   },
