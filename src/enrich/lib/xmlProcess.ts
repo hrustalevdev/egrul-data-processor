@@ -16,10 +16,10 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
 
   let contractor: ContractorBuilder | null = null;
   const contractors: TFullOrganizationDataItem[] = [];
-  const openTags: Map<string, true> = new Map();
+  const openedTags: Map<string, true> = new Map();
 
-  xmlStream.on('opentag', (tag) => openTags.set(tag.name, true));
-  xmlStream.on('closetag', (tag) => openTags.delete(tag));
+  xmlStream.on('opentag', (tag) => openedTags.set(tag.name, true));
+  xmlStream.on('closetag', (tag) => openedTags.delete(tag));
 
   /** ЕГРЮЛ */
   xmlStream.on('opentag', (tag) => {
@@ -29,7 +29,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       case 'СвЮЛ': {
         if (contractor) {
           contractors.push(contractor.build());
-          openTags.clear();
+          openedTags.clear();
         }
 
         contractor = ContractorBuilder.init();
@@ -73,7 +73,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'СвФЛ': {
-        if (!openTags.has('СведДолжнФЛ')) return;
+        if (!openedTags.has('СведДолжнФЛ')) return;
 
         const surname = tag.attributes['Фамилия'];
         const name = tag.attributes['Имя'];
@@ -85,7 +85,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'СвДолжн': {
-        if (!openTags.has('СведДолжнФЛ')) return;
+        if (!openedTags.has('СведДолжнФЛ')) return;
 
         const post = tag.attributes['НаимДолжн'] as string;
         contractor?.setManagementPost(post);
@@ -93,7 +93,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'СвАдрЮЛФИАС': {
-        if (!openTags.has('СвАдресЮЛ')) return;
+        if (!openedTags.has('СвАдресЮЛ')) return;
 
         const postalCode = tag.attributes['Индекс'] as string;
         contractor?.setAddrPostalCode(postalCode);
@@ -101,7 +101,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'МуниципРайон': {
-        if (!openTags.has('СвАдресЮЛ')) return;
+        if (!openedTags.has('СвАдресЮЛ')) return;
 
         const kind = tag.attributes['ВидКод'] as UAreaKind;
         const area = tag.attributes['Наим'] as string;
@@ -110,7 +110,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'ГородСелПоселен': {
-        if (!openTags.has('СвАдресЮЛ')) return;
+        if (!openedTags.has('СвАдресЮЛ')) return;
 
         const kind = tag.attributes['ВидКод'] as UAreaKind;
         const settlement = tag.attributes['Наим'] as string;
@@ -119,7 +119,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'НаселенПункт': {
-        if (!openTags.has('СвАдресЮЛ')) return;
+        if (!openedTags.has('СвАдресЮЛ')) return;
 
         const kind = tag.attributes['Вид'] as string;
         const locality = tag.attributes['Наим'] as string;
@@ -128,7 +128,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'ЭлПланСтруктур': {
-        if (!openTags.has('СвАдресЮЛ')) return;
+        if (!openedTags.has('СвАдресЮЛ')) return;
 
         const kind = tag.attributes['Тип'] as string;
         const district = tag.attributes['Наим'] as string;
@@ -137,7 +137,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'ЭлУлДорСети': {
-        if (!openTags.has('СвАдресЮЛ')) return;
+        if (!openedTags.has('СвАдресЮЛ')) return;
 
         const kind = tag.attributes['Тип'] as string;
         const street = tag.attributes['Наим'] as string;
@@ -146,7 +146,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'Здание': {
-        if (!openTags.has('СвАдресЮЛ')) return;
+        if (!openedTags.has('СвАдресЮЛ')) return;
 
         const kind = tag.attributes['Тип'] as string;
         const number = tag.attributes['Номер'] as string;
@@ -155,7 +155,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'ПомещЗдания': {
-        if (!openTags.has('СвАдресЮЛ')) return;
+        if (!openedTags.has('СвАдресЮЛ')) return;
 
         const kind = tag.attributes['Тип'] as string;
         const number = tag.attributes['Номер'] as string;
@@ -164,7 +164,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'ПомещКвартиры': {
-        if (!openTags.has('СвАдресЮЛ')) return;
+        if (!openedTags.has('СвАдресЮЛ')) return;
 
         const kind = tag.attributes['Тип'] as string;
         const number = tag.attributes['Номер'] as string;
@@ -180,7 +180,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
 
       case 'СвОКВЭДОсн':
       case 'СвОКВЭДДоп': {
-        const isMain = openTags.has('СвОКВЭДОсн');
+        const isMain = openedTags.has('СвОКВЭДОсн');
         const code = tag.attributes['КодОКВЭД'] as string;
         const name = tag.attributes['НаимОКВЭД'] as string;
         const type = tag.attributes['ПрВерсОКВЭД'] as string;
@@ -197,7 +197,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'СвНО': {
-        if (!openTags.has('СвУчетНО')) return;
+        if (!openedTags.has('СвУчетНО')) return;
 
         const code = tag.attributes['КодНО'] as string;
         const name = tag.attributes['НаимНО'] as string;
@@ -207,7 +207,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'СвОргПФ': {
-        if (!openTags.has('СвРегПФ')) return;
+        if (!openedTags.has('СвРегПФ')) return;
 
         const code = tag.attributes['КодПФ'] as string;
         const name = tag.attributes['НаимПФ'] as string;
@@ -217,7 +217,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'СвОргФСС': {
-        if (!openTags.has('СвРегФСС')) return;
+        if (!openedTags.has('СвРегФСС')) return;
 
         const code = tag.attributes['КодФСС'] as string;
         const name = tag.attributes['НаимФСС'] as string;
@@ -250,7 +250,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
   xmlStream.on('text', (text) => {
     if (registryType !== 'egrul') return;
 
-    if (openTags.has('СвАдресЮЛ') && openTags.has('НаимРегион')) {
+    if (openedTags.has('СвАдресЮЛ') && openedTags.has('НаимРегион')) {
       contractor?.setAddrRegion(text);
     }
   });
