@@ -1,9 +1,10 @@
+import * as console from 'console';
 import iconv from 'iconv-lite';
 import type JSZip from 'jszip';
 import sax from 'sax';
 
 import { Contractor, ContractorBuilder } from '../../db';
-import type { TFullOrganizationDataItem } from '../../db/types';
+import type { TFullOrganizationDataItem, UAreaKind } from '../../db/types';
 import { registryType } from '../../env';
 
 export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
@@ -16,6 +17,9 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
   let contractor: ContractorBuilder | null = null;
   const contractors: TFullOrganizationDataItem[] = [];
   const openTags: Map<string, true> = new Map();
+
+  xmlStream.on('opentag', (tag) => openTags.set(tag.name, true));
+  xmlStream.on('closetag', (tag) => openTags.delete(tag));
 
   /** ЕГРЮЛ */
   xmlStream.on('opentag', (tag) => {
@@ -66,11 +70,6 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         break;
       }
 
-      case 'СведДолжнФЛ': {
-        openTags.set(tag.name, true);
-        break;
-      }
-
       case 'СвФЛ': {
         if (!openTags.has('СведДолжнФЛ')) return;
 
@@ -91,12 +90,22 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         break;
       }
 
-      case 'СвАдресЮЛ': {
-        openTags.set(tag.name, true);
+      case 'СвАдрЮЛФИАС': {
+        if (!openTags.has('СвАдресЮЛ')) return;
+
+        const postalCode = tag.attributes['Индекс'] as string;
+        contractor?.setAddrPostalCode(postalCode);
         break;
       }
 
-      // case 'СвАдрЮЛФИАС'
+      case 'МуниципРайон': {
+        if (!openTags.has('СвАдресЮЛ')) return;
+
+        const kind = tag.attributes['ВидКод'] as UAreaKind;
+        const area = tag.attributes['Наим'] as string;
+        contractor?.setMunicipalArea(kind, area);
+        break;
+      }
 
       // TODO: добавить мыло
       // case 'СвАдрЭлПочты': {
@@ -113,9 +122,14 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       // }
     }
   });
-  // .on('text', (text) => {
-  //   console.log('>>>TEXT: ', text);
-  // })
+
+  xmlStream.on('text', (text) => {
+    if (registryType !== 'egrul') return;
+
+    if (openTags.has('СвАдресЮЛ') && openTags.has('НаимРегион')) {
+      contractor?.setAddrRegion(text);
+    }
+  });
 
   /** ЕГРИП */
   xmlStream.on('opentag', (tag) => {
@@ -162,8 +176,6 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
     //   }
     // }
   });
-
-  xmlStream.on('closetag', (tag) => openTags.delete(tag));
 
   xmlStream.on('error', (error) => {
     console.error(error);
