@@ -102,6 +102,8 @@ const FullOrganizationData = new Schema<IFullOrganizationData>({
       unrestricted_value: String,
       data: {
         source: String,
+        local: String,
+        domain: String,
       },
     },
   ],
