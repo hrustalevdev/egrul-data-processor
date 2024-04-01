@@ -260,13 +260,13 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  /** C: СвОргПФ; A_OK: КодПФ, НаимПФ */
+  /** C: СвРегПФ > СвОргПФ; A_OK: КодПФ, НаимПФ */
   setPf(code: string, name: string) {
     this.data.authorities.pf = { code, name };
     return this;
   }
 
-  /** C: СвОргФСС; A_OK: КодФСС, НаимФСС */
+  /** C: СвРегФСС > СвОргФСС; A_OK: КодФСС, НаимФСС */
   setSif(code: string, name: string) {
     this.data.authorities.sif = { code, name };
     return this;

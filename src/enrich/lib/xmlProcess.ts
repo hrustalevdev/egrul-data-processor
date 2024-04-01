@@ -203,6 +203,24 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         break;
       }
 
+      case 'СвОргПФ': {
+        if (!openTags.has('СвРегПФ')) return;
+
+        const code = tag.attributes['КодПФ'] as string;
+        const name = tag.attributes['НаимПФ'] as string;
+        contractor?.setPf(code, name);
+        break;
+      }
+
+      case 'СвОргФСС': {
+        if (!openTags.has('СвРегФСС')) return;
+
+        const code = tag.attributes['КодФСС'] as string;
+        const name = tag.attributes['НаимФСС'] as string;
+        contractor?.setSif(code, name);
+        break;
+      }
+
       // TODO: добавить мыло
       // case 'СвАдрЭлПочты': {
       //   const email = tag.attributes['E-mail'] as string;
