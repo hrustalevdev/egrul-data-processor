@@ -31,9 +31,9 @@ interface IAddress {
   room?: string;
 }
 
-type UKind = '1' | '2' | '3' | '4';
-type TMunicipalAreaKind = Record<UKind, string>;
-type TSettlementKind = TMunicipalAreaKind;
+export type UAreaKind = '1' | '2' | '3' | '4';
+export type TMunicipalAreaKind = Record<UAreaKind, string>;
+export type TSettlementKind = TMunicipalAreaKind;
 
 export class ContractorBuilder implements TFullOrganizationDataItem {
   private readonly _address: IAddress = {};
@@ -159,13 +159,13 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
   }
 
   /** С: МуниципРайон; A_O: ВидКод, Наим */
-  setMunicipalArea(kind: UKind, area: string) {
+  setMunicipalArea(kind: UAreaKind, area: string) {
     this._address.municipalArea = `${this._municipalAreaKind[kind]} ${area}`;
     return this;
   }
 
   /** C: ГородСелПоселен; A_O: ВидКод, Наим */
-  setSettlement(kind: UKind, settlement: string) {
+  setSettlement(kind: UAreaKind, settlement: string) {
     this._address.settlement = `${this._municipalAreaKind[kind]} ${settlement}`;
     return this;
   }

@@ -6,3 +6,9 @@ export {
   UType,
   UStatus,
 } from './organizations';
+
+export {
+  UAreaKind,
+  TMunicipalAreaKind,
+  TSettlementKind,
+} from '../lib/ContractorBuilder';
