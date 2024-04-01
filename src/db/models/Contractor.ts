@@ -34,7 +34,7 @@ const FullOrganizationData = new Schema<IFullOrganizationData>({
   kpp: String,
   ogrn: String,
   ogrn_date: Number,
-  type: ['LEGAL', 'INDIVIDUAL'],
+  type: String,
   name: {
     short_with_opf: String,
     full_with_opf: String,
@@ -52,7 +52,7 @@ const FullOrganizationData = new Schema<IFullOrganizationData>({
     unrestricted_value: String,
   },
   state: {
-    status: ['ACTIVE', 'BANKRUPT', 'LIQUIDATED', 'LIQUIDATING', 'REORGANIZING'],
+    status: String,
   },
   citizenship: {
     name: {
@@ -76,9 +76,9 @@ const FullOrganizationData = new Schema<IFullOrganizationData>({
           patronymic: String,
         },
       ],
-      type: ['LEGAL', 'PHYSICAL'],
+      type: String,
       share: {
-        type: ['DECIMAL', 'PERCENT', 'FRACTION'],
+        type: String,
         value: Number,
         numerator: Number,
         denominator: Number,
