@@ -239,12 +239,11 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         break;
       }
 
-      // TODO: добавить мыло
-      // case 'СвАдрЭлПочты': {
-      //   const email = tag.attributes['E-mail'] as string;
-      //   contractor?.setEmail(email);
-      //   break;
-      // }
+      case 'СвАдрЭлПочты': {
+        const email = tag.attributes['E-mail'] as string;
+        contractor?.setEmail(email);
+        break;
+      }
     }
   });
 

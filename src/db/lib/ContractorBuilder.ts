@@ -340,6 +340,24 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
+  /** С: СвАдрЭлПочты; A_O: E-mail */
+  setEmail(email: string) {
+    const [local, domain] = email.split('@');
+    this.data.emails = [
+      {
+        value: email,
+        unrestricted_value: email,
+        data: {
+          source: email.toLowerCase(),
+          local,
+          domain,
+        },
+      },
+    ];
+
+    return this;
+  }
+
   build() {
     const { value, unrestricted_value, data } = this;
     const address =
