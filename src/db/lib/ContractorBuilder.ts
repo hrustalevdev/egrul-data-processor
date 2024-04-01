@@ -103,15 +103,10 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  /** C: СвЮЛ; A_O: ОГРН */
-  setOgrn(ogrn: string) {
+  /** C: СвЮЛ; A_O: ОГРН, ДатаОГРН */
+  setOgrn(ogrn: string, date: string) {
     this.data.ogrn = ogrn;
-    return this;
-  }
-
-  /** C: СвЮЛ; A_O: ДатаОГРН */
-  setOgrnDate(ogrnDate: string) {
-    this.data.ogrn_date = this._getTimestamp(ogrnDate);
+    this.data.ogrn_date = this._getTimestamp(date);
     return this;
   }
 
@@ -130,19 +125,22 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  /** C: СвНаимЮЛ; A_O: НаимЮЛСокр */
+  /**
+   * C: СвНаимЮЛ; A_H: НаимЮЛСокр
+   * C: СвНаимЮЛСокр; A_O: НаимСокр
+   */
   setShortNameWithOpf(name: string) {
     this.data.name.short_with_opf = name;
     return this;
   }
 
-  /** C: СведДолжнФЛ; C_H: СвФЛ; A_H: Фамилия, Имя, Отчество */
+  /** C: СведДолжнФЛ > C_H: СвФЛ; A_H: Фамилия, Имя, Отчество */
   setManagementName(name: string) {
     this.data.management = { name, post: '' };
     return this;
   }
 
-  /** C: СведДолжнФЛ; C_H: СвДолжн; A_O: НаимДолжн */
+  /** C: СведДолжнФЛ > C_H: СвДолжн; A_O: НаимДолжн */
   setManagementPost(post: string) {
     this.data.management.post = post;
     return this;

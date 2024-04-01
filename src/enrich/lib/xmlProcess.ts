@@ -2,8 +2,8 @@ import iconv from 'iconv-lite';
 import type JSZip from 'jszip';
 import sax from 'sax';
 
-import { Organization, OrganizationBuilder } from '../../db';
-import type { IOrganization } from '../../db';
+import { Contractor, ContractorBuilder } from '../../db';
+import type { TFullOrganizationDataItem } from '../../db/types';
 import { registryType } from '../../env';
 
 export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
@@ -13,94 +13,160 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
     .pipe(iconv.decodeStream('win1251'))
     .pipe(saxStream);
 
-  const organizations: IOrganization[] = [];
-  let organization: OrganizationBuilder | null = null;
+  const contractors: TFullOrganizationDataItem[] = [];
+  let contractor: ContractorBuilder | null = null;
+  const openTags: Map<string, true> = new Map();
 
-  xmlStream.on('opentag', (node) => {
-    if (registryType === 'egrul') {
-      switch (node.name) {
-        case 'СвЮЛ': {
-          if (organization) organizations.push(organization.build());
+  xmlStream
+    .on('opentag', (tag) => {
+      if (registryType === 'egrul') {
+        switch (tag.name) {
+          case 'СвЮЛ': {
+            if (contractor) {
+              contractors.push(contractor.build());
+              openTags.clear();
+            }
 
-          const ogrn = node.attributes['ОГРН'] as string;
-          const ogrnDate = node.attributes['ДатаОГРН'] as string;
-          const opf = node.attributes?.['ПолнНаимОПФ'] as string;
-          const inn = node.attributes?.['ИНН'] as string;
-          const kpp = node.attributes?.['КПП'] as string;
+            contractor = ContractorBuilder.init();
 
-          organization = new OrganizationBuilder(ogrn, ogrnDate, opf, inn, kpp);
-          break;
-        }
+            const ogrn = tag.attributes['ОГРН'] as string;
+            const ogrnDate = tag.attributes['ДатаОГРН'] as string;
+            const inn = tag.attributes?.['ИНН'] as string;
+            const kpp = tag.attributes?.['КПП'] as string;
 
-        case 'СвНаимЮЛ': {
-          const fullName = node.attributes['НаимЮЛПолн'] as string;
-          organization?.setFullName(fullName);
-          break;
-        }
+            contractor.setType('LEGAL');
+            contractor.setOgrn(ogrn, ogrnDate);
+            contractor.setInn(inn);
+            contractor.setKpp(kpp);
 
-        case 'СвНаимЮЛСокр': {
-          const shortName = node.attributes['НаимСокр'] as string;
-          organization?.setShortName(shortName);
-          break;
-        }
+            break;
+          }
 
-        case 'СвАдрЭлПочты': {
-          const email = node.attributes['E-mail'] as string;
-          organization?.setEmail(email);
-          break;
-        }
+          case 'СвУчетНО': {
+            const inn = tag.attributes?.['ИНН'] as string;
+            const kpp = tag.attributes?.['КПП'] as string;
 
-        case 'СвОКВЭДОсн': {
-          const code = node.attributes['КодОКВЭД'] as string;
-          const name = node.attributes['НаимОКВЭД'] as string;
-          organization?.setMainOkved(code, name);
-          break;
+            contractor?.setInn(inn);
+            contractor?.setKpp(kpp);
+
+            break;
+          }
+
+          case 'СвНаимЮЛ': {
+            const fullNameWithOpf = tag.attributes['НаимЮЛПолн'] as string;
+            const shortNameWithOpf = tag.attributes['НаимЮЛСокр'] as string;
+            contractor?.setValue(fullNameWithOpf);
+            contractor?.setFullNameWithOpf(fullNameWithOpf);
+            shortNameWithOpf &&
+              contractor?.setShortNameWithOpf(shortNameWithOpf);
+
+            break;
+          }
+
+          case 'СвНаимЮЛСокр': {
+            const shortName = tag.attributes['НаимСокр'] as string;
+            contractor?.setShortNameWithOpf(shortName);
+
+            break;
+          }
+
+          case 'СведДолжнФЛ': {
+            openTags.set(tag.name, true);
+            break;
+          }
+
+          case 'СвФЛ': {
+            if (openTags.has('СведДолжнФЛ')) {
+              const surname = tag.attributes['Фамилия'];
+              const name = tag.attributes['Имя'];
+              const patronymic = tag.attributes['Отчество'];
+              const fullName = [surname, name, patronymic]
+                .filter(Boolean)
+                .join(' ');
+
+              contractor?.setManagementName(fullName);
+            }
+
+            break;
+          }
+
+          case 'СвДолжн': {
+            if (openTags.has('СведДолжнФЛ')) {
+              const post = tag.attributes['НаимДолжн'] as string;
+              contractor?.setManagementPost(post);
+            }
+
+            break;
+          }
+
+          // TODO: добавить мыло
+          // case 'СвАдрЭлПочты': {
+          //   const email = tag.attributes['E-mail'] as string;
+          //   contractor?.setEmail(email);
+          //   break;
+          // }
+
+          // case 'СвОКВЭДОсн': {
+          //   const code = tag.attributes['КодОКВЭД'] as string;
+          //   const name = tag.attributes['НаимОКВЭД'] as string;
+          //   contractor?.setMainOkved(code, name);
+          //   break;
+          // }
         }
       }
-    }
 
-    if (registryType === 'egrip') {
-      switch (node.name) {
-        case 'СвИП': {
-          if (organization) organizations.push(organization.build());
-
-          const ogrn = node.attributes['ОГРНИП'] as string;
-          const ogrnDate = node.attributes['ДатаОГРНИП'] as string;
-          const opf = node.attributes?.['НаимВидИП'] as string;
-          const inn = node.attributes?.['ИННФЛ'] as string;
-
-          organization = new OrganizationBuilder(ogrn, ogrnDate, opf, inn);
-          break;
-        }
-
-        case 'ФИОРус': {
-          const lastName = node.attributes['Фамилия'] as string;
-          const firstName = node.attributes['Имя'] as string;
-          const patronymic = node.attributes['Отчество'] as string;
-
-          const fullName = [lastName, firstName, patronymic]
-            .filter(Boolean)
-            .join(' ');
-
-          organization?.setFullName(fullName);
-          break;
-        }
-
-        case 'СвАдрЭлПочты': {
-          const email = node.attributes['E-mail'] as string;
-          organization?.setEmail(email);
-          break;
-        }
-
-        case 'СвОКВЭДОсн': {
-          const code = node.attributes['КодОКВЭД'] as string;
-          const name = node.attributes['НаимОКВЭД'] as string;
-          organization?.setMainOkved(code, name);
-          break;
-        }
+      if (registryType === 'egrip') {
+        // switch (tag.name) {
+        //   case 'СвИП': {
+        //     if (contractor) contractors.push(contractor.build());
+        //
+        //     const ogrn = tag.attributes['ОГРНИП'] as string;
+        //     const ogrnDate = tag.attributes['ДатаОГРНИП'] as string;
+        //     const opf = tag.attributes?.['НаимВидИП'] as string;
+        //     const inn = tag.attributes?.['ИННФЛ'] as string;
+        //
+        //     contractor = new OrganizationBuilder(ogrn, ogrnDate, opf, inn);
+        //     break;
+        //   }
+        //
+        //   case 'ФИОРус': {
+        //     const lastName = tag.attributes['Фамилия'] as string;
+        //     const firstName = tag.attributes['Имя'] as string;
+        //     const patronymic = tag.attributes['Отчество'] as string;
+        //
+        //     const fullName = [lastName, firstName, patronymic]
+        //       .filter(Boolean)
+        //       .join(' ');
+        //
+        //     contractor?.setFullName(fullName);
+        //     break;
+        //   }
+        //
+        //   case 'СвАдрЭлПочты': {
+        //     const email = tag.attributes['E-mail'] as string;
+        //     contractor?.setEmail(email);
+        //     break;
+        //   }
+        //
+        //   case 'СвОКВЭДОсн': {
+        //     const code = tag.attributes['КодОКВЭД'] as string;
+        //     const name = tag.attributes['НаимОКВЭД'] as string;
+        //     contractor?.setMainOkved(code, name);
+        //     break;
+        //   }
+        // }
       }
-    }
-  });
+    })
+    .on('closetag', (tag) => openTags.delete(tag));
+  // .on('text', (text) => {
+  //   console.log('>>>TEXT: ', text);
+  // })
+  // .on('closetag', (tag) => {
+  //   console.log('>>>CLOSED_TAG: ', tag);
+  // })
+  // .on('opentag', (tag) => {
+  //   console.log('>>>OPEN_TAG2: ', tag);
+  // });
 
   xmlStream.on('error', (error) => {
     console.error(error);
@@ -108,8 +174,8 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
   });
 
   xmlStream.on('end', () => {
-    if (organization) organizations.push(organization.build());
-    Organization.insertMany(organizations);
+    if (contractor) contractors.push(contractor.build());
+    Contractor.insertMany(contractors);
   });
 
   await new Promise((resolve) => xmlStream.on('end', resolve));
