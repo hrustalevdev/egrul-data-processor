@@ -49,9 +49,11 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       case 'СвУчетНО': {
         const inn = tag.attributes?.['ИНН'] as string;
         const kpp = tag.attributes?.['КПП'] as string;
+        const date = tag.attributes['ДатаПостУч'] as string;
 
         contractor?.setInn(inn);
         contractor?.setKpp(kpp);
+        contractor?.setFtsReportDoc({ date });
         break;
       }
 
@@ -200,6 +202,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         const code = tag.attributes['КодНО'] as string;
         const name = tag.attributes['НаимНО'] as string;
         contractor?.setFtsReport(code, name);
+        contractor?.setFtsReportDoc({ code });
         break;
       }
 
@@ -209,6 +212,7 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         const code = tag.attributes['КодПФ'] as string;
         const name = tag.attributes['НаимПФ'] as string;
         contractor?.setPf(code, name);
+        contractor?.setPfRegDoc({ code });
         break;
       }
 
@@ -225,6 +229,13 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         const type = tag.attributes['НаимВидКап'] as string;
         const value = tag.attributes['СумКап'] as string;
         contractor?.setCapital(type, value);
+        break;
+      }
+
+      case 'СвРегПФ': {
+        const number = tag.attributes['РегНомПФ'] as string;
+        const date = tag.attributes['ДатаРег'] as string;
+        contractor?.setPfRegDoc({ number, date });
         break;
       }
 

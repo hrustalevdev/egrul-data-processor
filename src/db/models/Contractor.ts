@@ -29,6 +29,11 @@ const Okved = new Schema({
   name: String,
 });
 
+const Capital = new Schema({
+  type: String,
+  value: Number,
+});
+
 const FullOrganizationData = new Schema<IFullOrganizationData>({
   inn: String,
   kpp: String,
@@ -86,12 +91,8 @@ const FullOrganizationData = new Schema<IFullOrganizationData>({
       },
     },
   ],
-  capital: {
-    type: String,
-    value: Number,
-  },
+  capital: Capital,
   documents: {
-    fts_registration: RegistrationDocument,
     fts_report: RegistrationDocument,
     pf_registration: RegistrationDocument,
   },

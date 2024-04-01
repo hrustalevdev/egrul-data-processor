@@ -50,7 +50,6 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     '4': 'внутригородской район городского округа',
   };
   private readonly _statusCodesMap = statusCodesMap;
-  private readonly _ftsRegDocument: Partial<IRegistrationDocument> = {};
 
   constructor(
     public value: string,
@@ -62,6 +61,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return new this('', '', {
       state: { status: 'ACTIVE' },
       authorities: {},
+      documents: {},
     } as IFullOrganizationData);
   }
 
@@ -166,7 +166,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
 
   /** C: ГородСелПоселен; A_O: ВидКод, Наим */
   setSettlement(kind: UAreaKind, settlement: string) {
-    this._address.settlement = `${this._municipalAreaKind[kind]} ${settlement}`;
+    this._address.settlement = `${this._settlementKind[kind]} ${settlement}`;
     return this;
   }
 
@@ -290,41 +290,67 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  /** C: СвРегОрг; A_OK: КодНО */
-  setFtsDocumentAuthority(authority: string) {
-    this._ftsRegDocument.type = 'FTS_REGISTRATION';
-    this._ftsRegDocument.issue_authority = authority;
+  /**
+   * C: СвУчетНО; A_O: ДатаПостУч
+   * C: СвУчетНО > СвНО; A_OK: КодНО
+   */
+  setFtsReportDoc(params: { date?: string; code?: string }) {
+    const { date, code } = params;
+    if (!this.data.documents.fts_report) {
+      this.data.documents.fts_report = {
+        type: 'FTS_REPORT',
+      } as IRegistrationDocument;
+    }
+
+    if (date) {
+      this.data.documents.fts_report.issue_date = this._getTimestamp(date);
+    }
+
+    if (code) {
+      this.data.documents.fts_report.issue_authority = code;
+    }
 
     return this;
   }
 
-  /** C: СвСвид; A_H: Серия, Номер; A_O: ДатаВыдСвид */
-  setFtsDocumentNumber(series: string, number: string, date: string) {
-    this._ftsRegDocument.series = series;
-    this._ftsRegDocument.number = number;
-    this._ftsRegDocument.issue_date = this._getTimestamp(date);
+  /**
+   * C: СвРегПФ; A_O: РегНомПФ, ДатаРег
+   * C: СвРегПФ > СвОргПФ; A_OK: КодПФ
+   */
+  setPfRegDoc(params: { number?: string; date?: string; code?: string }) {
+    const { number, date, code } = params;
+    if (!this.data.documents.pf_registration) {
+      this.data.documents.pf_registration = {
+        type: 'PF_REGISTRATION',
+      } as IRegistrationDocument;
+    }
+
+    if (number) {
+      this.data.documents.pf_registration.number = number;
+    }
+
+    if (date) {
+      this.data.documents.pf_registration.issue_date = this._getTimestamp(date);
+    }
+
+    if (code) {
+      this.data.documents.pf_registration.issue_authority = code;
+    }
 
     return this;
   }
 
   build() {
     const { value, unrestricted_value, data } = this;
-    const address = this._address;
-    const fts_registration = this._ftsRegDocument;
-
-    // TODO: founders, ?documents.fts_report, documents.pf_registration
+    const address =
+      !this._isEmptyObj(this._address) && this._prepareAddress(this._address);
 
     return {
       value,
       unrestricted_value,
       data: {
         ...data,
-        ...(!this._isEmptyObj(address) && {
-          address: this._prepareAddress(address),
-        }),
-        ...(!this._isEmptyObj(fts_registration) && {
-          documents: { fts_registration },
-        }),
+        ...(address && { address }),
       },
     } as TFullOrganizationDataItem;
   }
