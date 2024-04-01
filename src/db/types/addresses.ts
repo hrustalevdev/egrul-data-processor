@@ -119,7 +119,7 @@ export interface IAddressItem {
     qc_house?: unknown;
     history_values?: unknown;
     unparsed_parts?: unknown;
-    source?: unknown;
+    source?: string;
     qc?: unknown;
   };
 }

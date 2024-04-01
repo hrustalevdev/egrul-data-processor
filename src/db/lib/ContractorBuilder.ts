@@ -2,15 +2,16 @@ import { getTime, parse } from 'date-fns';
 
 import type {
   IFullOrganizationData,
+  IRegistrationDocument,
   TFullOrganizationDataItem,
   UType,
 } from '../types';
+import type { IAddressItem } from '../types/addresses';
 
 import { statusCodesMap } from './statusCodesMap';
 
 interface IAddress {
   postalCode?: string;
-  regionId?: string;
   region?: string;
   /** Муниципальный район */
   municipalArea?: string;
@@ -49,6 +50,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     '4': 'внутригородской район городского округа',
   };
   private readonly _statusCodesMap = statusCodesMap;
+  private readonly _ftsRegDocument: Partial<IRegistrationDocument> = {};
 
   constructor(
     public value: string,
@@ -106,14 +108,9 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  /**
-   * C: СвЮЛ; A_O: ДатаОГРН
-   * Преобразовываем полученную дату в миллисекунды.
-   * @param ogrnDate - `yyyy-MM-dd`, ex.: `2023-12-30`.
-   */
+  /** C: СвЮЛ; A_O: ДатаОГРН */
   setOgrnDate(ogrnDate: string) {
-    const parsedDate = parse(ogrnDate, 'yyyy-MM-dd', new Date());
-    this.data.ogrn_date = getTime(parsedDate);
+    this.data.ogrn_date = this._getTimestamp(ogrnDate);
     return this;
   }
 
@@ -152,12 +149,6 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
   /** C: СвАдрЮЛФИАС; A_H: Индекс */
   setAddrPostalCode(code: string) {
     this._address.postalCode = code;
-    return this;
-  }
-
-  /** С_П: Регион */
-  setAddrRegionId(id: string) {
-    this._address.regionId = id;
     return this;
   }
 
@@ -281,6 +272,8 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     this.data.founders ?
       this.data.founders.push({ ogrn, inn, name, type })
     : [this.data.founders];
+
+    return this;
   }
 
   /** C: СвУстКап; A_ОК: НаимВидКап; A_O: СумКап */
@@ -289,18 +282,82 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
+  /** C: СвРегОрг; A_OK: КодНО */
+  setFtsDocumentAuthority(authority: string) {
+    this._ftsRegDocument.type = 'FTS_REGISTRATION';
+    this._ftsRegDocument.issue_authority = authority;
+    return this;
+  }
+
+  /** C: СвСвид; A_H: Серия, Номер; A_O: ДатаВыдСвид */
+  setFtsDocumentNumber(series: string, number: string, date: string) {
+    this._ftsRegDocument.series = series;
+    this._ftsRegDocument.number = number;
+    this._ftsRegDocument.issue_date = this._getTimestamp(date);
+    return this;
+  }
+
   // TODO: вернуться и поля и методы! Критично?
   build() {
-    // TODO: собрать строку адреса из `_address`
-    // setAddress(address: string) {
-    //   this.data.address = {
-    //     value: address,
-    //     unrestricted_value: address,
-    //     data: {} as IAddressItem['data'],
-    //   };
-    //
-    //   return this;
-    // }
+    // TODO: fts_registration: this._ftsRegDocument if !this._isEmptyObj(obj)
+
     return this;
+  }
+
+  /**
+   * Преобразовывает полученную дату в миллисекунды.
+   * @param date - `yyyy-MM-dd`, ex.: `2023-12-30`.
+   * @private
+   */
+  private _getTimestamp(date: string) {
+    const parsedDate = parse(date, 'yyyy-MM-dd', new Date());
+    return getTime(parsedDate);
+  }
+
+  private _prepareAddress({
+    postalCode,
+    region,
+    municipalArea,
+    settlement,
+    locality,
+    district,
+    street,
+    building,
+    apartment,
+    room,
+  }: IAddress): Partial<IAddressItem> {
+    const source = [
+      postalCode,
+      region,
+      municipalArea,
+      settlement,
+      locality,
+      district,
+      street,
+      building,
+      apartment,
+      room,
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    const data = {
+      postal_code: postalCode,
+      region_with_type: region,
+      source,
+    } as IAddressItem['data'];
+
+    return {
+      value: source,
+      unrestricted_value: source,
+      data,
+    };
+  }
+
+  private _isEmptyObj(obj: object) {
+    if (!obj || typeof obj !== 'object') return;
+    if (Array.isArray(obj) && obj.length === 0) return true;
+
+    return Object.keys(obj).length === 0;
   }
 }
