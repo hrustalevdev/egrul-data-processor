@@ -273,8 +273,8 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
   }
 
   /**
-   * // TODO: разобраться в конце
-   * C: НаимИННЮЛ; A_H: ОГРН, ИНН, НаимЮЛПолн
+   * // TODO: сделать в конце
+   * C: СвУчредит > НаимИННЮЛ; A_H: ОГРН, ИНН, НаимЮЛПолн
    */
   setFounders({ ogrn, inn, name, type }: IFullOrganizationData['founders'][0]) {
     this.data.founders ?

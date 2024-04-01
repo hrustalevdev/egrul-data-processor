@@ -221,17 +221,17 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         break;
       }
 
+      case 'СвУстКап': {
+        const type = tag.attributes['НаимВидКап'] as string;
+        const value = tag.attributes['СумКап'] as string;
+        contractor?.setCapital(type, value);
+        break;
+      }
+
       // TODO: добавить мыло
       // case 'СвАдрЭлПочты': {
       //   const email = tag.attributes['E-mail'] as string;
       //   contractor?.setEmail(email);
-      //   break;
-      // }
-
-      // case 'СвОКВЭДОсн': {
-      //   const code = tag.attributes['КодОКВЭД'] as string;
-      //   const name = tag.attributes['НаимОКВЭД'] as string;
-      //   contractor?.setMainOkved(code, name);
       //   break;
       // }
     }
