@@ -36,8 +36,7 @@ export type UIpKind = '1' | '2';
 export type TMunicipalAreaKind = Record<UAreaKind, string>;
 export type TSettlementKind = TMunicipalAreaKind;
 export type TIpKind = Record<UIpKind, { full: string; short: string }>;
-export type TFounder = Omit<IFullOrganizationData['founders'][0], 'share'>;
-export type TFounderShare = IFullOrganizationData['founders'][0]['share'];
+export type TFounder = IFullOrganizationData['founders'][0];
 
 export class ContractorBuilder implements TFullOrganizationDataItem {
   private readonly _address: IAddress = {};
@@ -305,14 +304,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
    * C: СвУчредит > УчрЮЛИн > НаимИННЮЛ 4.131; A_H: ОГРН, ИНН; A_O: НаимЮЛПолн
    * C: СвУчредит > УчрФЛ; A_H: ОГРНИП > СвФЛ 4.129; A_H: Фамилия, Имя, Отчество, ИННФЛ
    * C: СвУчредит > УчрРФСубМО > СвОргОсущПр 4.46 > НаимИННЮЛ 4.131; A_H: ОГРН, ИНН; A_O: НаимЮЛПолн
-   */
-  setFounder(founder: TFounder) {
-    this._founders.push(founder);
-
-    return this;
-  }
-
-  /**
+   *
    * C: СвУчредит > УчрЮЛРос > ДоляУстКап 4.96
    * C: СвУчредит > УчрЮЛИн > ДоляУстКап 4.96
    * C: СвУчредит > УчрФЛ > ДоляУстКап 4.96
@@ -321,12 +313,9 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
    * ДоляУстКап 4.96; A_O: НоминСтоим > ДоляРубля 4.98; A_O: Числит, Знаменат
    * ДоляУстКап 4.96; A_O: НоминСтоим > РазмерДоли 4.97; П_О: Процент, ДробДесят; C_O: ДробПрост 4.98; A_O: Числит, Знаменат
    */
-  setFounderShare(share: TFounderShare) {
-    // TODO: поработать на параметрами
-    if (this._isEmptyObj(this._founders)) return;
-
-    const lastFounder = this._founders.at(-1);
-    if (lastFounder) lastFounder.share = share;
+  setFounder(founder: TFounder) {
+    this._founders.push(founder);
+    return this;
   }
 
   /** C: СвУстКап; A_ОК: НаимВидКап; A_O: СумКап */

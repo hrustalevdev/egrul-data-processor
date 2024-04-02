@@ -12,4 +12,5 @@ export {
   UIpKind,
   TMunicipalAreaKind,
   TSettlementKind,
+  TFounder,
 } from '../lib/ContractorBuilder';

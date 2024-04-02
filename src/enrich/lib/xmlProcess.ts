@@ -6,11 +6,16 @@ import type { QualifiedTag, Tag } from 'sax';
 
 import { Contractor, ContractorBuilder } from '../../db';
 import type {
+  TFounder,
   TFullOrganizationDataItem,
   UAreaKind,
   UIpKind,
 } from '../../db/types';
 import { registryType } from '../../env';
+
+interface IMemo {
+  founder: TFounder;
+}
 
 export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
   const saxStream = sax.createStream(true, { trim: true });
@@ -22,8 +27,8 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
   let contractor: ContractorBuilder | null = null;
   const contractors: TFullOrganizationDataItem[] = [];
   const openedTags: Map<string, true> = new Map();
-  /** Для промежуточного хранения переменных */
-  const memo = { ogrnip: '' };
+  /** Для промежуточного хранения данных */
+  const memo: IMemo = { founder: {} };
 
   const getFio = (tag: Tag | QualifiedTag) => {
     const surname = tag.attributes['Фамилия'];
@@ -93,11 +98,9 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         }
 
         if (openedTags.has('СвУчредит') && openedTags.has('УчрФЛ')) {
-          const ogrn = memo.ogrnip;
           const inn = tag.attributes['ИННФЛ'] as string;
           const fio = getFio(tag);
-          contractor?.setFounder({ ogrn, inn, fio, type: 'PHYSICAL' });
-          memo.ogrnip = '';
+          memo.founder = { inn, fio, type: 'PHYSICAL' };
         }
 
         break;
@@ -263,13 +266,35 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         const ogrn = tag.attributes['ОГРН'] as string;
         const inn = tag.attributes['ИНН'] as string;
         const name = tag.attributes['НаимЮЛПолн'] as string;
-        contractor?.setFounder({ ogrn, inn, name, type: 'LEGAL' });
+        memo.founder = { ogrn, inn, name, type: 'LEGAL' };
         break;
       }
 
       case 'УчрФЛ': {
         if (!openedTags.has('СвУчредит')) return;
-        memo.ogrnip = tag.attributes['ОГРНИП'] as string;
+        const ogrnip = tag.attributes['ОГРНИП'] as string;
+        ogrnip && (memo.founder.ogrn = ogrnip);
+        break;
+      }
+
+      case 'ДоляУстКап': {
+        const isUlRussian =
+          openedTags.has('СвУчредит') && openedTags.has('УчрЮЛРос');
+
+        const isUlForeign =
+          openedTags.has('СвУчредит') && openedTags.has('УчрЮЛИн');
+
+        const isUlMunicipal =
+          openedTags.has('СвУчредит') && openedTags.has('УчрРФСубМО');
+
+        const isUl = isUlRussian || isUlForeign || isUlMunicipal;
+
+        if (!isUl) return;
+
+        // const type = tag.attributes['НаимВидКап'] as string;
+        // const value = tag.attributes['ПроцУстКап'] as string;
+        // memo.founder.share = {  };
+        // contractor?.setFounderShare(type, value);
         break;
       }
 
@@ -290,6 +315,24 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       case 'СвАдрЭлПочты': {
         const email = tag.attributes['E-mail'] as string;
         contractor?.setEmail(email);
+        break;
+      }
+    }
+  });
+
+  xmlStream.on('closetag', (tag) => {
+    if (registryType !== 'egrul') return;
+
+    switch (tag) {
+      case 'УчрЮЛРос':
+      case 'УчрЮЛИн':
+      case 'УчрФЛ':
+      case 'УчрРФСубМО': {
+        if (!openedTags.has('СвУчредит')) return;
+        if (!Object.keys(memo.founder).length) return;
+
+        contractor?.setFounder(memo.founder);
+        memo.founder = {};
         break;
       }
     }
