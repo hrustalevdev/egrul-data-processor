@@ -44,11 +44,15 @@ const FullOrganizationData = new Schema<IFullOrganizationData>({
     short_with_opf: String,
     full_with_opf: String,
   },
-  okato: String,
-  oktmo: String,
-  okpo: String,
-  okogu: String,
-  okfs: String,
+  fio: {
+    surname: String,
+    name: String,
+    patronymic: String,
+  },
+  opf: {
+    full: String,
+    short: String,
+  },
   management: {
     name: String,
     post: String,

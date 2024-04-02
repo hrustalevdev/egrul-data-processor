@@ -9,6 +9,7 @@ export {
 
 export {
   UAreaKind,
+  UIpKind,
   TMunicipalAreaKind,
   TSettlementKind,
 } from '../lib/ContractorBuilder';

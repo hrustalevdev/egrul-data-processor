@@ -42,10 +42,10 @@ export interface IBaseOrganizationData {
   okved_type: string;
   opf: {
     /** Код по классификатору ОКОПФ */
-    code: string;
+    code?: string;
     full: string;
     short: string;
-    type: string;
+    type?: string;
   };
   management: {
     name: string;

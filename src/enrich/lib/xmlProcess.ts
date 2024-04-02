@@ -4,7 +4,11 @@ import type JSZip from 'jszip';
 import sax from 'sax';
 
 import { Contractor, ContractorBuilder } from '../../db';
-import type { TFullOrganizationDataItem, UAreaKind } from '../../db/types';
+import type {
+  TFullOrganizationDataItem,
+  UAreaKind,
+  UIpKind,
+} from '../../db/types';
 import { registryType } from '../../env';
 
 export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
@@ -258,47 +262,63 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
   /** ЕГРИП */
   xmlStream.on('opentag', (tag) => {
     if (registryType !== 'egrip') return;
-    console.log(tag);
 
-    // switch (tag.name) {
-    //   case 'СвИП': {
-    //     if (contractor) contractors.push(contractor.build());
-    //
-    //     const ogrn = tag.attributes['ОГРНИП'] as string;
-    //     const ogrnDate = tag.attributes['ДатаОГРНИП'] as string;
-    //     const opf = tag.attributes?.['НаимВидИП'] as string;
-    //     const inn = tag.attributes?.['ИННФЛ'] as string;
-    //
-    //     contractor = new OrganizationBuilder(ogrn, ogrnDate, opf, inn);
-    //     break;
-    //   }
-    //
-    //   case 'ФИОРус': {
-    //     const lastName = tag.attributes['Фамилия'] as string;
-    //     const firstName = tag.attributes['Имя'] as string;
-    //     const patronymic = tag.attributes['Отчество'] as string;
-    //
-    //     const fullName = [lastName, firstName, patronymic]
-    //       .filter(Boolean)
-    //       .join(' ');
-    //
-    //     contractor?.setFullName(fullName);
-    //     break;
-    //   }
-    //
-    //   case 'СвАдрЭлПочты': {
-    //     const email = tag.attributes['E-mail'] as string;
-    //     contractor?.setEmail(email);
-    //     break;
-    //   }
-    //
-    //   case 'СвОКВЭДОсн': {
-    //     const code = tag.attributes['КодОКВЭД'] as string;
-    //     const name = tag.attributes['НаимОКВЭД'] as string;
-    //     contractor?.setMainOkved(code, name);
-    //     break;
-    //   }
-    // }
+    switch (tag.name) {
+      case 'СвИП': {
+        if (contractor) {
+          contractors.push(contractor.build());
+          openedTags.clear();
+        }
+
+        contractor = ContractorBuilder.init();
+
+        const ogrn = tag.attributes['ОГРНИП'] as string;
+        const ogrnDate = tag.attributes['ДатаОГРНИП'] as string;
+        const inn = tag.attributes?.['ИННФЛ'] as string;
+        const opfKind = tag.attributes?.['КодВидИП'] as UIpKind;
+
+        contractor.setType('INDIVIDUAL');
+        contractor.setOgrn(ogrn, ogrnDate);
+        contractor.setInn(inn);
+        contractor.setIpOpf(opfKind);
+        break;
+      }
+
+      case 'ФИОРус': {
+        if (!openedTags.has('СвФЛ')) return;
+
+        const surname = tag.attributes['Фамилия'] as string;
+        const name = tag.attributes['Имя'] as string;
+        const patronymic = tag.attributes['Отчество'] as string;
+
+        const fio = [surname, name, patronymic].filter(Boolean).join(' ');
+        const fullOpfWithName = [contractor?.data.opf.full, fio]
+          .filter(Boolean)
+          .join(' ');
+        const shortOpfWithName = [contractor?.data.opf.short, fio]
+          .filter(Boolean)
+          .join(' ');
+
+        contractor?.setIpFio(surname, name, patronymic);
+        contractor?.setValue(shortOpfWithName);
+        contractor?.setFullNameWithOpf(fullOpfWithName);
+        contractor?.setShortNameWithOpf(shortOpfWithName);
+        break;
+      }
+
+      // case 'СвАдрЭлПочты': {
+      //   const email = tag.attributes['E-mail'] as string;
+      //   contractor?.setEmail(email);
+      //   break;
+      // }
+      //
+      // case 'СвОКВЭДОсн': {
+      //   const code = tag.attributes['КодОКВЭД'] as string;
+      //   const name = tag.attributes['НаимОКВЭД'] as string;
+      //   contractor?.setMainOkved(code, name);
+      //   break;
+      // }
+    }
   });
 
   xmlStream.on('error', (error) => {

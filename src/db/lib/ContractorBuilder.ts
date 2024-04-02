@@ -32,8 +32,10 @@ interface IAddress {
 }
 
 export type UAreaKind = '1' | '2' | '3' | '4';
+export type UIpKind = '1' | '2';
 export type TMunicipalAreaKind = Record<UAreaKind, string>;
 export type TSettlementKind = TMunicipalAreaKind;
+export type TIpKind = Record<UIpKind, { full: string; short: string }>;
 
 export class ContractorBuilder implements TFullOrganizationDataItem {
   private readonly _address: IAddress = {};
@@ -48,6 +50,10 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     '2': 'сельское поселение',
     '3': 'межселенная территория в составе муниципального района',
     '4': 'внутригородской район городского округа',
+  };
+  private readonly _ipKind: TIpKind = {
+    '1': { full: 'Индивидуальный предприниматель', short: 'ИП' },
+    '2': { full: 'Глава крестьянского фермерского хозяйства', short: 'ГКФХ' },
   };
   private readonly _statusCodesMap = statusCodesMap;
 
@@ -88,6 +94,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
   /**
    * C: СвЮЛ; A_H: ИНН
    * C: СвУчетНО; A_O: ИНН
+   * C: СвИП, A_H: ИННФЛ
    */
   setInn(inn: string) {
     this.data.inn = inn;
@@ -103,11 +110,27 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     return this;
   }
 
-  /** C: СвЮЛ; A_O: ОГРН, ДатаОГРН */
+  /**
+   * C: СвЮЛ; A_O: ОГРН, ДатаОГРН
+   * C: СвИП: A_O: ОГРНИП, ДатаОГРНИП
+   */
   setOgrn(ogrn: string, date: string) {
     this.data.ogrn = ogrn;
     this.data.ogrn_date = this._getTimestamp(date);
     return this;
+  }
+
+  /** C: СвФЛ > ФИОРус; A_H: Фамилия, Имя, Отчество */
+  setIpFio(surname: string, name: string, patronymic: string) {
+    this.data.fio = { surname, name, patronymic };
+  }
+
+  /** C: СвИП; A_OK: КодВидИП */
+  setIpOpf(kind: UIpKind) {
+    this.data.opf = {
+      full: this._ipKind[kind].full,
+      short: this._ipKind[kind].short,
+    };
   }
 
   /** "LEGAL" | "INDIVIDUAL" */
