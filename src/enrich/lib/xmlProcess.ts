@@ -324,6 +324,16 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         contractor?.setCitizenship(kind, country);
         break;
       }
+
+      case 'СвОКВЭДОсн':
+      case 'СвОКВЭДДоп': {
+        const isMain = openedTags.has('СвОКВЭДОсн');
+        const code = tag.attributes['КодОКВЭД'] as string;
+        const name = tag.attributes['НаимОКВЭД'] as string;
+        const type = tag.attributes['ПрВерсОКВЭД'] as string;
+        contractor?.setOkved(isMain, code, name, type);
+        break;
+      }
     }
   });
 
