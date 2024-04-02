@@ -29,6 +29,22 @@ const Okved = new Schema({
   name: String,
 });
 
+const Share = new Schema({
+  type: String,
+  value: Number,
+  numerator: Number,
+  denominator: Number,
+});
+
+const Founder = new Schema({
+  ogrn: String,
+  inn: String,
+  name: String,
+  fio: String,
+  type: String,
+  share: Share,
+});
+
 const Capital = new Schema({
   type: String,
   value: Number,
@@ -75,26 +91,7 @@ const FullOrganizationData = new Schema<IFullOrganizationData>({
     pf: Authority,
     sif: Authority,
   },
-  founders: [
-    {
-      name: String,
-      fio: [
-        String,
-        {
-          surname: String,
-          name: String,
-          patronymic: String,
-        },
-      ],
-      type: String,
-      share: {
-        type: String,
-        value: Number,
-        numerator: Number,
-        denominator: Number,
-      },
-    },
-  ],
+  founders: [Founder],
   capital: Capital,
   documents: {
     fts_report: RegistrationDocument,

@@ -2,6 +2,7 @@ import * as console from 'console';
 import iconv from 'iconv-lite';
 import type JSZip from 'jszip';
 import sax from 'sax';
+import type { QualifiedTag, Tag } from 'sax';
 
 import { Contractor, ContractorBuilder } from '../../db';
 import type {
@@ -21,6 +22,15 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
   let contractor: ContractorBuilder | null = null;
   const contractors: TFullOrganizationDataItem[] = [];
   const openedTags: Map<string, true> = new Map();
+  /** Для промежуточного хранения переменных */
+  const memo = { ogrnip: '' };
+
+  const getFio = (tag: Tag | QualifiedTag) => {
+    const surname = tag.attributes['Фамилия'];
+    const name = tag.attributes['Имя'];
+    const patronymic = tag.attributes['Отчество'];
+    return [surname, name, patronymic].filter(Boolean).join(' ');
+  };
 
   xmlStream.on('opentag', (tag) => openedTags.set(tag.name, true));
   xmlStream.on('closetag', (tag) => openedTags.delete(tag));
@@ -77,14 +87,19 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       }
 
       case 'СвФЛ': {
-        if (!openedTags.has('СведДолжнФЛ')) return;
+        if (openedTags.has('СведДолжнФЛ')) {
+          const fio = getFio(tag);
+          contractor?.setManagementName(fio);
+        }
 
-        const surname = tag.attributes['Фамилия'];
-        const name = tag.attributes['Имя'];
-        const patronymic = tag.attributes['Отчество'];
-        const fullName = [surname, name, patronymic].filter(Boolean).join(' ');
+        if (openedTags.has('СвУчредит') && openedTags.has('УчрФЛ')) {
+          const ogrn = memo.ogrnip;
+          const inn = tag.attributes['ИННФЛ'] as string;
+          const fio = getFio(tag);
+          contractor?.setFounder({ ogrn, inn, fio, type: 'PHYSICAL' });
+          memo.ogrnip = '';
+        }
 
-        contractor?.setManagementName(fullName);
         break;
       }
 
@@ -229,6 +244,35 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         break;
       }
 
+      case 'НаимИННЮЛ': {
+        const isUlRussian =
+          openedTags.has('СвУчредит') && openedTags.has('УчрЮЛРос');
+
+        const isUlForeign =
+          openedTags.has('СвУчредит') && openedTags.has('УчрЮЛИн');
+
+        const isUlMunicipal =
+          openedTags.has('СвУчредит') &&
+          openedTags.has('УчрРФСубМО') &&
+          openedTags.has('СвОргОсущПр');
+
+        const isUl = isUlRussian || isUlForeign || isUlMunicipal;
+
+        if (!isUl) return;
+
+        const ogrn = tag.attributes['ОГРН'] as string;
+        const inn = tag.attributes['ИНН'] as string;
+        const name = tag.attributes['НаимЮЛПолн'] as string;
+        contractor?.setFounder({ ogrn, inn, name, type: 'LEGAL' });
+        break;
+      }
+
+      case 'УчрФЛ': {
+        if (!openedTags.has('СвУчредит')) return;
+        memo.ogrnip = tag.attributes['ОГРНИП'] as string;
+        break;
+      }
+
       case 'СвУстКап': {
         const type = tag.attributes['НаимВидКап'] as string;
         const value = tag.attributes['СумКап'] as string;
@@ -287,17 +331,17 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
       case 'ФИОРус': {
         if (!openedTags.has('СвФЛ')) return;
 
-        const surname = tag.attributes['Фамилия'] as string;
-        const name = tag.attributes['Имя'] as string;
-        const patronymic = tag.attributes['Отчество'] as string;
-
-        const fio = [surname, name, patronymic].filter(Boolean).join(' ');
+        const fio = getFio(tag);
         const fullOpfWithName = [contractor?.data.opf.full, fio]
           .filter(Boolean)
           .join(' ');
         const shortOpfWithName = [contractor?.data.opf.short, fio]
           .filter(Boolean)
           .join(' ');
+
+        const surname = tag.attributes['Фамилия'] as string;
+        const name = tag.attributes['Имя'] as string;
+        const patronymic = tag.attributes['Отчество'] as string;
 
         contractor?.setIpFio(surname, name, patronymic);
         contractor?.setValue(shortOpfWithName);

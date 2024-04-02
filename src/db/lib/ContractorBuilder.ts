@@ -36,6 +36,8 @@ export type UIpKind = '1' | '2';
 export type TMunicipalAreaKind = Record<UAreaKind, string>;
 export type TSettlementKind = TMunicipalAreaKind;
 export type TIpKind = Record<UIpKind, { full: string; short: string }>;
+export type TFounder = Omit<IFullOrganizationData['founders'][0], 'share'>;
+export type TFounderShare = IFullOrganizationData['founders'][0]['share'];
 
 export class ContractorBuilder implements TFullOrganizationDataItem {
   private readonly _address: IAddress = {};
@@ -56,6 +58,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
     '2': { full: 'Глава крестьянского фермерского хозяйства', short: 'ГКФХ' },
   };
   private readonly _statusCodesMap = statusCodesMap;
+  private readonly _founders: IFullOrganizationData['founders'] = [];
 
   constructor(
     public value: string,
@@ -298,15 +301,32 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
   }
 
   /**
-   * // TODO: сделать в конце
-   * C: СвУчредит > НаимИННЮЛ; A_H: ОГРН, ИНН, НаимЮЛПолн
+   * C: СвУчредит > УчрЮЛРос > НаимИННЮЛ 4.131; A_H: ОГРН, ИНН; A_O: НаимЮЛПолн
+   * C: СвУчредит > УчрЮЛИн > НаимИННЮЛ 4.131; A_H: ОГРН, ИНН; A_O: НаимЮЛПолн
+   * C: СвУчредит > УчрФЛ; A_H: ОГРНИП > СвФЛ 4.129; A_H: Фамилия, Имя, Отчество, ИННФЛ
+   * C: СвУчредит > УчрРФСубМО > СвОргОсущПр 4.46 > НаимИННЮЛ 4.131; A_H: ОГРН, ИНН; A_O: НаимЮЛПолн
    */
-  setFounders({ ogrn, inn, name, type }: IFullOrganizationData['founders'][0]) {
-    this.data.founders ?
-      this.data.founders.push({ ogrn, inn, name, type })
-    : [this.data.founders];
+  setFounder(founder: TFounder) {
+    this._founders.push(founder);
 
     return this;
+  }
+
+  /**
+   * C: СвУчредит > УчрЮЛРос > ДоляУстКап 4.96
+   * C: СвУчредит > УчрЮЛИн > ДоляУстКап 4.96
+   * C: СвУчредит > УчрФЛ > ДоляУстКап 4.96
+   * C: СвУчредит > УчрРФСубМО > ДоляУстКап 4.96
+   *
+   * ДоляУстКап 4.96; A_O: НоминСтоим > ДоляРубля 4.98; A_O: Числит, Знаменат
+   * ДоляУстКап 4.96; A_O: НоминСтоим > РазмерДоли 4.97; П_О: Процент, ДробДесят; C_O: ДробПрост 4.98; A_O: Числит, Знаменат
+   */
+  setFounderShare(share: TFounderShare) {
+    // TODO: поработать на параметрами
+    if (this._isEmptyObj(this._founders)) return;
+
+    const lastFounder = this._founders.at(-1);
+    if (lastFounder) lastFounder.share = share;
   }
 
   /** C: СвУстКап; A_ОК: НаимВидКап; A_O: СумКап */
@@ -385,8 +405,11 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
 
   build() {
     const { value, unrestricted_value, data } = this;
+
     const address =
       !this._isEmptyObj(this._address) && this._prepareAddress(this._address);
+
+    const founders = !this._isEmptyObj(this._founders) && this._founders;
 
     return {
       value,
@@ -394,6 +417,7 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
       data: {
         ...data,
         ...(address && { address }),
+        ...(founders && { founders }),
       },
     } as TFullOrganizationDataItem;
   }
