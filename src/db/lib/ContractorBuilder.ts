@@ -94,7 +94,9 @@ export class ContractorBuilder implements TFullOrganizationDataItem {
   /**
    * C: СвЮЛ; A_H: ИНН
    * C: СвУчетНО; A_O: ИНН
+   *
    * C: СвИП, A_H: ИННФЛ
+   * C: СвУчетНО; A_O: ИННФЛ
    */
   setInn(inn: string) {
     this.data.inn = inn;
