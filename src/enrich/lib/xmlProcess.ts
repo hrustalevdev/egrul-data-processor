@@ -334,6 +334,56 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         contractor?.setOkved(isMain, code, name, type);
         break;
       }
+
+      case 'СвРегОрг': {
+        const code = tag.attributes['КодНО'] as string;
+        const name = tag.attributes['НаимНО'] as string;
+        const address = tag.attributes['АдрРО'] as string;
+        contractor?.setFtsRegistration(code, name, address);
+        break;
+      }
+
+      case 'СвНО': {
+        if (!openedTags.has('СвУчетНО')) return;
+
+        const code = tag.attributes['КодНО'] as string;
+        const name = tag.attributes['НаимНО'] as string;
+        contractor?.setFtsReport(code, name);
+        contractor?.setFtsReportDoc({ code });
+        break;
+      }
+
+      case 'СвОргПФ': {
+        if (!openedTags.has('СвРегПФ')) return;
+
+        const code = tag.attributes['КодПФ'] as string;
+        const name = tag.attributes['НаимПФ'] as string;
+        contractor?.setPf(code, name);
+        contractor?.setPfRegDoc({ code });
+        break;
+      }
+
+      case 'СвОргФСС': {
+        if (!openedTags.has('СвРегФСС')) return;
+
+        const code = tag.attributes['КодФСС'] as string;
+        const name = tag.attributes['НаимФСС'] as string;
+        contractor?.setSif(code, name);
+        break;
+      }
+
+      case 'СвРегПФ': {
+        const number = tag.attributes['РегНомПФ'] as string;
+        const date = tag.attributes['ДатаРег'] as string;
+        contractor?.setPfRegDoc({ number, date });
+        break;
+      }
+
+      case 'СвАдрЭлПочты': {
+        const email = tag.attributes['E-mail'] as string;
+        contractor?.setEmail(email);
+        break;
+      }
     }
   });
 
