@@ -306,6 +306,12 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         break;
       }
 
+      case 'СвУчетНО': {
+        const inn = tag.attributes?.['ИННФЛ'] as string;
+        contractor?.setInn(inn);
+        break;
+      }
+
       // case 'СвАдрЭлПочты': {
       //   const email = tag.attributes['E-mail'] as string;
       //   contractor?.setEmail(email);
