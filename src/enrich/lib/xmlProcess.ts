@@ -317,6 +317,13 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         contractor?.setStatus(code);
         break;
       }
+
+      case 'СвГражд': {
+        const kind = tag.attributes['ВидГражд'] as string;
+        const country = tag.attributes['НаимСтран'] as string;
+        contractor?.setCitizenship(kind, country);
+        break;
+      }
     }
   });
 
