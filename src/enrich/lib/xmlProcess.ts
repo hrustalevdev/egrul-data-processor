@@ -312,18 +312,11 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
         break;
       }
 
-      // case 'СвАдрЭлПочты': {
-      //   const email = tag.attributes['E-mail'] as string;
-      //   contractor?.setEmail(email);
-      //   break;
-      // }
-      //
-      // case 'СвОКВЭДОсн': {
-      //   const code = tag.attributes['КодОКВЭД'] as string;
-      //   const name = tag.attributes['НаимОКВЭД'] as string;
-      //   contractor?.setMainOkved(code, name);
-      //   break;
-      // }
+      case 'СвСтатус': {
+        const code = tag.attributes['КодСтатус'] as string;
+        contractor?.setStatus(code);
+        break;
+      }
     }
   });
 
