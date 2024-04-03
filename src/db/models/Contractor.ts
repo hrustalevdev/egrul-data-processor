@@ -18,7 +18,7 @@ const RegistrationDocument = new Schema<IRegistrationDocument>({
   type: String,
   series: String,
   number: String,
-  issue_date: String,
+  issue_date: Number,
   issue_authority: String,
 });
 
