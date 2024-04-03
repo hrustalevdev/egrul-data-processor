@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "rm -rf ./dist && tsc",
+    "build": "rimraf dist && tsc",
     "confirmation": "echo 'Are you sure? (y/n)' && read -r answer && [ \"$answer\" = \"y\" ] && echo '\n'",
     "enrich": "npm run confirmation -s && npm run build -s && DROP_DATABASE=true npm run enrich:egrul -s && npm run enrich:egrip -s",
     "enrich:egrul": "npm run confirmation -s && npm run build -s && REGISTRY_TYPE=egrul node dist/enrich",
@@ -12,11 +12,11 @@
     "enrich:test": "npm run build -s && DROP_DATABASE=true npm run enrich:egrul:test -s && npm run enrich:egrip:test -s",
     "enrich:egrul:test": "npm run build -s && NODE_ENV=testing REGISTRY_TYPE=egrul node dist/enrich",
     "enrich:egrip:test": "npm run build -s && NODE_ENV=testing REGISTRY_TYPE=egrip node dist/enrich",
-    "clean:sitemap": "rm -rf ./output/sitemap",
-    "clean:sitemap:test": "rm -rf ./output/_sitemap",
+    "clean:sitemap": "rimraf output/sitemap",
+    "clean:sitemap:test": "rimraf output/_sitemap",
     "sitemap": "npm run confirmation -s && npm run build -s && npm run clean:sitemap -s && node dist/sitemap-creator",
     "sitemap:test": "npm run build -s && npm run clean:sitemap:test -s && NODE_ENV=testing node dist/sitemap-creator",
-    "clean:links": "rm -rf ./output/links",
+    "clean:links": "rimraf output/links",
     "links": "npm run confirmation -s && npm run build -s && npm run clean:links -s && node dist/links-creator"
   },
   "repository": {
@@ -37,6 +37,7 @@
     "mongodb": "^6.3.0",
     "mongoose": "^8.1.0",
     "progress": "^2.0.3",
+    "rimraf": "^5.0.5",
     "sax": "^1.3.0",
     "sitemap": "^7.1.1"
   },
