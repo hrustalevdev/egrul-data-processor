@@ -395,7 +395,10 @@ export const xmlProcess = async (xmlFile: JSZip.JSZipObject) => {
 
       case 'СвУчетНО': {
         const inn = tag.attributes?.['ИННФЛ'] as string;
+        const date = tag.attributes['ДатаПостУч'] as string;
+
         contractor?.setInn(inn);
+        contractor?.setFtsReportDoc({ date });
         break;
       }
 
