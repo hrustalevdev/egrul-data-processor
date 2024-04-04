@@ -9,9 +9,8 @@ export const zipProcess = async (zipFilePath: string) => {
     file.name.match(/\.xml$/i),
   );
 
-  await Promise.all(
-    xmlFiles.map(async (xmlFile) => {
-      await xmlProcess(xmlFile);
-    }),
-  );
+  /** Promise.all не подходит, т.к. сильно нагружает память */
+  for (const xmlFile of xmlFiles) {
+    await xmlProcess(xmlFile);
+  }
 };
